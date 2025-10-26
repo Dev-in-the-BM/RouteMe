@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    :root {
+      --primary-color: #4a90e2;
+      --success-color: #4CAF50;
+      --danger-color: #f44336;
+      --light-gray: #f4f4f9;
+      --medium-gray: #e0e0e0;
+      --dark-gray: #555;
+      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--light-gray);
+      margin: 0;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      display: grid;
+      gap: 2rem;
+    }
+    .card {
+      background: white;
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+    h1, h2 {
+      margin: 0;
+      color: #333;
+    }
+    h2 { font-size: 1.5rem; }
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    .btn-primary { background-color: var(--primary-color); color: white; }
+    .btn-primary:hover { background-color: #357ABD; }
+    .btn-success { background-color: var(--success-color); color: white; }
+    .btn-success:hover { background-color: #45a049; }
+    .btn-danger { background-color: var(--danger-color); color: white; }
+    .btn-danger:hover { background-color: #d32f2f; }
+    .btn-secondary { background-color: #ccc; color: #333; }
+    .btn-secondary:hover { background-color: #bbb; }
+
+    /* Group List */
+    #group-list { display: grid; gap: 1rem; }
+    .group-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
+    }
+    .group-details { font-family: 'SF Mono', 'Courier New', monospace; font-size: 0.9rem; }
+    .group-details span { display: block; margin-bottom: 0.25rem; }
+    .group-details .keywords { font-weight: bold; color: #333; font-size: 1.1rem; }
+    .group-details .label { font-weight: 600; color: var(--dark-gray); }
+    .group-actions { display: flex; gap: 0.5rem; }
+
+    /* Form Styles */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #444; }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 0.7rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+
+    /* Modal Styles */
+    .modal-backdrop {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; }
+
+    /* Toasts */
+    #toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transition: opacity 0.3s, bottom 0.3s;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; bottom: 30px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 GroupMe Bot Settings</h1>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Global Settings</h2>
+        <button id="save-global-btn" class="btn btn-primary">Save Globals</button>
+      </div>
+      <div id="global-settings-form" class="form-grid">
+        <div class="form-group">
+          <label for="USER_PREFIX">Fallback User Prefix</label>
+          <input type="text" id="USER_PREFIX">
+        </div>
+        <div class="form-group">
+          <label for="USER_COUNT">Fallback User Count</label>
+          <input type="number" id="USER_COUNT">
+        </div>
+         <div class="form-group">
+          <label for="SHMUZTECH_COUNT">ShmuzTech Onboarding Count</label>
+          <input type="number" id="SHMUZTECH_COUNT">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Group Management</h2>
+        <button id="add-group-btn" class="btn btn-success">Add New Group</button>
+      </div>
+      <div id="group-list">
+        </div>
+    </div>
+  </div>
+
+  <div id="group-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Add New Group</h2>
+        <h2 style="cursor:pointer;" onclick="closeModal()">×</h2>
+      </div>
+      <form id="group-form">
+        <input type="hidden" id="original-group-id">
+        <input type="hidden" id="original-keywords-str">
+        <div class="form-group">
+          <label for="keywords">Keywords (comma-separated)</label>
+          <input type="text" id="keywords" required>
+        </div>
+        <div class="form-group">
+          <label for="groupId">Group ID</label>
+          <input type="text" id="groupId" required>
+        </div>
+        <p style="color:#777; font-size:0.9rem;">Optional: Override global settings for this group.</p>
+        <div class="form-group">
+          <label for="prefix">Custom Prefix</label>
+          <input type="text" id="prefix" placeholder="Leave blank to use global">
+        </div>
+        <div class="form-group">
+          <label for="count">Custom Count</label>
+          <input type="number" id="count" placeholder="Leave blank to use global">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Group</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <div id="toast"></div>
+
+  <template id="group-template">
+    <div class="group-item">
+      <div class="group-details">
+        <span class="keywords"></span>
+        <span><span class="label">ID:</span> <span class="groupId"></span></span>
+        <span><span class="label">Prefix:</span> <span class="prefix"></span></span>
+        <span><span class="label">Count:</span> <span class="count"></span></span>
+      </div>
+      <div class="group-actions">
+        <button class="btn btn-secondary edit-btn">Edit</button>
+        <button class="btn btn-danger delete-btn">Delete</button>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    let currentGroups = [];
+    const groupList = document.getElementById('group-list');
+    const groupTemplate = document.getElementById('group-template');
+    const modal = document.getElementById('group-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const groupForm = document.getElementById('group-form');
+    const toast = document.getElementById('toast');
+
+    // --- Data Fetching and Rendering ---
+    document.addEventListener('DOMContentLoaded', () => {
+      loadGlobalSettings();
+      loadGroups();
+    });
+
+    function loadGlobalSettings() {
+      google.script.run.withSuccessHandler(settings => {
+        document.getElementById('USER_PREFIX').value = settings.USER_PREFIX;
+        document.getElementById('USER_COUNT').value = settings.USER_COUNT;
+        document.getElementById('SHMUZTECH_COUNT').value = settings.SHMUZTECH_COUNT;
+      }).getGlobalSettings();
+    }
+
+    function loadGroups() {
+      google.script.run.withSuccessHandler(groups => {
+        currentGroups = groups;
+        renderGroups();
+      }).getGroupConfigs();
+    }
+    
+    function renderGroups() {
+      groupList.innerHTML = '';
+      currentGroups.forEach(group => {
+        const clone = groupTemplate.content.cloneNode(true);
+        clone.querySelector('.keywords').textContent = group.keywords.join(', ');
+        clone.querySelector('.groupId').textContent = group.groupId;
+        clone.querySelector('.prefix').textContent = group.prefix || '(Global)';
+        clone.querySelector('.count').textContent = group.count || '(Global)';
+        
+        const editBtn = clone.querySelector('.edit-btn');
+        editBtn.dataset.groupId = group.groupId;
+        editBtn.addEventListener('click', handleEdit);
+        
+        const deleteBtn = clone.querySelector('.delete-btn');
+        deleteBtn.dataset.groupId = group.groupId;
+        deleteBtn.addEventListener('click', handleDelete);
+        
+        groupList.appendChild(clone);
+      });
+    }
+
+    // --- Modal Handling ---
+    function openModal(mode, group) {
+      groupForm.reset();
+      if (mode === 'edit') {
+        modalTitle.textContent = 'Edit Group';
+        document.getElementById('original-group-id').value = group.groupId;
+        document.getElementById('original-keywords-str').value = group.keywords.join(',');
+        document.getElementById('keywords').value = group.keywords.join(', ');
+        document.getElementById('groupId').value = group.groupId;
+        document.getElementById('prefix').value = group.prefix || '';
+        document.getElementById('count').value = group.count || '';
+      } else {
+        modalTitle.textContent = 'Add New Group';
+        document.getElementById('original-group-id').value = '';
+        document.getElementById('original-keywords-str').value = '';
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
+    }
+
+    // --- Event Handlers ---
+    document.getElementById('add-group-btn').addEventListener('click', () => openModal('add'));
+    
+    document.getElementById('save-global-btn').addEventListener('click', () => {
+      const settings = {
+        USER_PREFIX: document.getElementById('USER_PREFIX').value,
+        USER_COUNT: document.getElementById('USER_COUNT').value,
+        SHMUZTECH_COUNT: document.getElementById('SHMUZTECH_COUNT').value,
+      };
+      google.script.run.withSuccessHandler(() => showToast('Global settings saved!')).saveGlobalSettings(settings);
+    });
+
+    function handleEdit(e) {
+      const groupId = e.target.dataset.groupId;
+      const group = currentGroups.find(g => g.groupId === groupId);
+      openModal('edit', group);
+    }
+    
+    function handleDelete(e) {
+      const groupId = e.target.dataset.groupId;
+      const group = currentGroups.find(g => g.groupId === groupId);
+      if (confirm(`Are you sure you want to delete the group for keywords "${group.keywords.join(', ')}"?`)) {
+        google.script.run.withSuccessHandler(message => {
+          showToast(message);
+          loadGroups();
+        }).deleteGroup(groupId);
+      }
+    }
+    
+    groupForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const groupData = {
+        keywords: document.getElementById('keywords').value,
+        groupId: document.getElementById('groupId').value,
+        prefix: document.getElementById('prefix').value,
+        count: document.getElementById('count').value,
+        originalGroupId: document.getElementById('original-group-id').value,
+        originalKeywordsStr: document.getElementById('original-keywords-str').value,
+      };
+      
+      google.script.run.withSuccessHandler(message => {
+        showToast(message);
+        loadGroups();
+        closeModal();
+      }).saveGroup(groupData);
+    });
+    
+    // --- UI Feedback ---
+    function showToast(message, isError = false) {
+      toast.textContent = message;
+      toast.style.backgroundColor = isError ? 'var(--danger-color)' : 'var(--success-color)';
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>
