@@ -185,7 +185,40 @@ function runShmuzTechOnboardingModule(data, config, sheet) {
  * =================================================================================
  * === BATCH PROCESSING LOGIC =====================================================
  * =================================================================================
- * This function now orchestrates the batch adding process.
+ */
+
+/**
+ * Updates and saves the user count, either globally or for a specific group.
+ * This centralizes the counter logic to be used by different adding strategies.
+ * @param {boolean} useGroupSpecificCounter - Flag to determine which counter to use.
+ * @param {string} groupId - The group ID (used if group-specific).
+ * @param {number} newCount - The new count to save.
+ * @param {object} config - The master configuration object (will be updated in-memory).
+ */
+function updateGroupMeAdderCount(useGroupSpecificCounter, groupId, newCount, config) {
+  const properties = PropertiesService.getScriptProperties();
+  if (useGroupSpecificCounter) {
+    const groupConfigs = JSON.parse(properties.getProperty('GROUPME_ADDER_CONFIG') || '[]');
+    const groupIndex = groupConfigs.findIndex(g => g.groupId === groupId);
+    if (groupIndex !== -1) {
+      groupConfigs[groupIndex].count = newCount;
+      properties.setProperty('GROUPME_ADDER_CONFIG', JSON.stringify(groupConfigs, null, 2));
+      // Also update the in-memory config to prevent stale data during the script run
+      const inMemoryGroupIndex = config.groupMeConfig.findIndex(g => g.groupId === groupId);
+      if (inMemoryGroupIndex !== -1) {
+        config.groupMeConfig[inMemoryGroupIndex].count = newCount;
+      }
+      Logger.log(`Group-specific count for group ${groupId} updated to ${newCount}`);
+    }
+  } else {
+    properties.setProperty('USER_COUNT', newCount.toString());
+    config.userCount = newCount; // Update in-memory config
+    Logger.log(`Global USER_COUNT updated to ${newCount}`);
+  }
+}
+
+/**
+ * This function orchestrates the adding process, supporting both batch and one-by-one methods.
  * @param {Array<object>} actions - Array of queued actions from the email loop.
  * @param {object} config - The master configuration object.
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - The logging sheet.
@@ -238,35 +271,45 @@ function processGroupMeAdds(actions, config, sheet) {
       return { ...member, nickname: nickname };
     });
 
-    // Add members in a single API call
-    const addResult = addToGroupMe(config.token, groupId, membersWithNicknames);
-    
-    // Log the result for all members in this batch
-    const finalNicknames = membersWithNicknames.map(m => m.nickname).join(', ');
-    const statusMessage = addResult.success 
-      ? `Success - Batch added ${membersWithNicknames.length} members as: ${finalNicknames}`
-      : `Error - Batch add failed: ${addResult.status}`;
-    
-    membersToAdd.forEach(member => {
-      logEntry(sheet, member.phone_number, groupData.keyword, statusMessage);
-    });
-
-    // --- 3. Increment and save the counter on success ---
-    if (addResult.success) {
-      const properties = PropertiesService.getScriptProperties();
-      if (useGroupSpecificCounter) {
-        const groupConfigs = JSON.parse(properties.getProperty('GROUPME_ADDER_CONFIG') || '[]');
-        const groupIndex = groupConfigs.findIndex(g => g.groupId === groupId);
-        if (groupIndex !== -1) {
-          groupConfigs[groupIndex].count = currentCount;
-          properties.setProperty('GROUPME_ADDER_CONFIG', JSON.stringify(groupConfigs, null, 2));
-          config.groupMeConfig[groupIndex].count = currentCount; // Update in-memory config
-          Logger.log(`Group-specific count for group ${groupId} updated to ${currentCount}`);
+    // --- 3. Add members: Batch (default) or One-by-One ---
+    // The `useBatchAdd` property in the group's config controls this.
+    // If undefined or true, it will use the batch API. If false, it adds one-by-one.
+    if (groupConfig.useBatchAdd === false) {
+      // --- One-by-one processing ---
+      debugLog(`-> Processing ${membersWithNicknames.length} members one-by-one for group ${groupId}.`);
+      let allSucceeded = true;
+      
+      membersWithNicknames.forEach(member => {
+        const addResult = addToGroupMe(config.token, groupId, [member]); // `addToGroupMe` expects an array
+        if (addResult.success) {
+          logEntry(sheet, member.phone_number, groupData.keyword, `Success - Added as: ${member.nickname}`);
+        } else {
+          allSucceeded = false;
+          logEntry(sheet, member.phone_number, groupData.keyword, `Error - Add failed: ${addResult.status}`);
         }
-      } else {
-        properties.setProperty('USER_COUNT', currentCount.toString());
-        config.userCount = currentCount; // Update in-memory config
-        Logger.log(`Global USER_COUNT updated to ${currentCount}`);
+        Utilities.sleep(500); // Small delay between individual API calls to avoid rate limiting
+      });
+
+      if (allSucceeded) {
+        updateGroupMeAdderCount(useGroupSpecificCounter, groupId, currentCount, config);
+      }
+
+    } else {
+      // --- Batch processing (default behavior) ---
+      debugLog(`-> Processing ${membersWithNicknames.length} members as a batch for group ${groupId}.`);
+      const addResult = addToGroupMe(config.token, groupId, membersWithNicknames);
+      
+      const finalNicknames = membersWithNicknames.map(m => m.nickname).join(', ');
+      const statusMessage = addResult.success 
+        ? `Success - Batch added ${membersWithNicknames.length} members as: ${finalNicknames}`
+        : `Error - Batch add failed: ${addResult.status}`;
+      
+      membersToAdd.forEach(member => {
+        logEntry(sheet, member.phone_number, groupData.keyword, statusMessage);
+      });
+
+      if (addResult.success) {
+        updateGroupMeAdderCount(useGroupSpecificCounter, groupId, currentCount, config);
       }
     }
   }
@@ -530,7 +573,7 @@ function setup() {
   }
 
   const defaultProperties = {
-    'GROUPME_TOKEN': 'PASTE_YOUR_GROUPME_API_TOKEN_HERE',
+    // IMPORTANT: Set the GROUPME_TOKEN in Project Settings > Script Properties
     'USER_PREFIX': 'User',
     'USER_COUNT': '1',
     'SHMUZTECH_COUNT': '1',
