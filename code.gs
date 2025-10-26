@@ -8,6 +8,8 @@
 function processGoogleVoiceEmails() {
   const properties = PropertiesService.getScriptProperties();
   const emailAlerts = [];
+  const groupMeActions = []; // Queue for batching GroupMe adds
+
   // --- 1. Load Configuration from Script Properties ---
   const config = {
     token: properties.getProperty('GROUPME_TOKEN'),
@@ -46,7 +48,6 @@ function processGoogleVoiceEmails() {
       const subject = message.getSubject();
       debugLog(`Inspecting message: "${subject}" (ID: ${message.getId()})`);
 
-      // This is the critical gate. We now log WHY we skip a message.
       if (message.isUnread() && !processedIds.has(message.getId())) {
         debugLog('-> Condition MET. Message is unread and not processed. Proceeding...');
         
@@ -70,22 +71,26 @@ function processGoogleVoiceEmails() {
         }
         debugLog(`--> Detected Keyword: "${detectedKeyword}"`);
 
-        // --- 3. Dispatch to the Correct Module ---
+        // --- 3. Dispatch or Queue Module ---
         const moduleName = config.routingRules[detectedKeyword];
         const data = { phone: phoneE164, keyword: detectedKeyword, message: messageText };
         
-        try {
-          dispatchModule(moduleName, data, config, logSheet);
-        } catch (e) {
-          const errorMessage = `Error dispatching module '${moduleName}': ${e.message}`;
-          logEntry(logSheet, phoneE164, detectedKeyword, errorMessage);
-          emailAlerts.push(errorMessage);
+        if (moduleName === 'groupMeAdder') {
+          debugLog(`--> Queuing for GroupMe batch add. Keyword: "${detectedKeyword}"`);
+          groupMeActions.push(data);
+        } else {
+          try {
+            dispatchModule(moduleName, data, config, logSheet);
+          } catch (e) {
+            const errorMessage = `Error dispatching module '${moduleName}': ${e.message}`;
+            logEntry(logSheet, phoneE164, detectedKeyword, errorMessage);
+            emailAlerts.push(errorMessage);
+          }
         }
 
         markMessageProcessed(message, idSheet, processedIds);
 
       } else {
-        // This ELSE block is new and will tell us why messages were skipped.
         if (!message.isUnread()) {
           debugLog('-> SKIPPING: Message was already marked as read.');
         }
@@ -97,7 +102,13 @@ function processGoogleVoiceEmails() {
   });
   debugLog(`------------- Finished Email Processing Loop -------------`);
 
-  // --- 4. Send Error Summary Email ---
+  // --- 4. Process Batch GroupMe Adds ---
+  if (groupMeActions.length > 0) {
+    debugLog(`Processing ${groupMeActions.length} queued GroupMe actions.`);
+    processGroupMeAdds(groupMeActions, config, logSheet);
+  }
+
+  // --- 5. Send Error Summary Email ---
   if (emailAlerts.length > 0) {
     const alertBody = 'Errors encountered in Google Voice Script:\n' + emailAlerts.join('\n');
     // MailApp.sendEmail('your-email@example.com', 'Google Voice Script Errors', alertBody);
@@ -106,7 +117,7 @@ function processGoogleVoiceEmails() {
 
 /**
  * Acts as a switchboard, calling the correct module function based on the module name.
- * @param {string} moduleName - The name of the module to run (e.g., 'groupMeAdder').
+ * @param {string} moduleName - The name of the module to run.
  * @param {object} data - The data object containing phone, keyword, and message.
  * @param {object} config - The master configuration object.
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - The logging sheet object.
@@ -114,9 +125,6 @@ function processGoogleVoiceEmails() {
 function dispatchModule(moduleName, data, config, sheet) {
   Logger.log(`Dispatching to module: ${moduleName} for keyword: ${data.keyword}`);
   switch (moduleName) {
-    case 'groupMeAdder':
-      runGroupMeAdderModule(data, config, sheet);
-      break;
     case 'shmuzTechOnboarding':
       runShmuzTechOnboardingModule(data, config, sheet);
       break;
@@ -124,7 +132,8 @@ function dispatchModule(moduleName, data, config, sheet) {
       runSampleModule(data, config, sheet);
       break;
     default:
-      throw new Error(`Module '${moduleName}' not found.`);
+      // Note: 'groupMeAdder' is handled separately now and won't be dispatched here.
+      throw new Error(`Module '${moduleName}' not found or is not a real-time module.`);
   }
 }
 
@@ -147,7 +156,8 @@ function runShmuzTechOnboardingModule(data, config, sheet) {
     return;
   }
   logEntry(sheet, data.phone, data.keyword, `Successfully created group "${groupName}" (ID: ${newGroup.id}).`);
-  const addResult = addToGroupMe(config.token, newGroup.id, data.phone, "New Member", "");
+  // Use the single-add function for this one-off addition
+  const addResult = addToGroupMe(config.token, newGroup.id, [{ phone_number: data.phone, nickname: "New Member" }]);
   if (!addResult.success) {
     logEntry(sheet, data.phone, data.keyword, `Error: Failed to add user to new group ${newGroup.id}.`);
     return;
@@ -173,75 +183,95 @@ function runShmuzTechOnboardingModule(data, config, sheet) {
 
 /**
  * =================================================================================
- * === UPDATED FUNCTION ============================================================
+ * === BATCH PROCESSING LOGIC =====================================================
  * =================================================================================
- * MODULE: Adds a user to a specific GroupMe group.
- * Now updates the in-memory count to ensure correct naming within a single run.
- * @param {object} data - The data object from the dispatcher.
+ * This function now orchestrates the batch adding process.
+ * @param {Array<object>} actions - Array of queued actions from the email loop.
  * @param {object} config - The master configuration object.
  * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - The logging sheet.
  */
-function runGroupMeAdderModule(data, config, sheet) {
-  // The config is now an array. We must search it.
-  const groupConfig = config.groupMeConfig.find(g => g.keywords && g.keywords.includes(data.keyword));
+function processGroupMeAdds(actions, config, sheet) {
+  const membersByGroup = {};
 
-  if (!groupConfig) {
-    logEntry(sheet, data.phone, data.keyword, `Error: No Group config found for this keyword.`);
-    return;
-  }
-  
-  // Use the settings from the found group object
-  const groupId = groupConfig.groupId;
-  const prefix = groupConfig.prefix || config.userPrefix; // Fallback to global prefix
-  const count = groupConfig.count !== undefined ? groupConfig.count : config.userCount; // Fallback to global count
-  const useGroupSpecificCounter = groupConfig.count !== undefined;
+  // --- 1. Pre-check for duplicates and group members ---
+  actions.forEach(data => {
+    const groupConfig = config.groupMeConfig.find(g => g.keywords && g.keywords.includes(data.keyword));
+    if (!groupConfig) {
+      logEntry(sheet, data.phone, data.keyword, `Error: No Group config found for this keyword.`);
+      return;
+    }
+    
+    const isDuplicate = checkGroupMeDuplicate(config.token, groupConfig.groupId, data.phone);
+    if (isDuplicate) {
+      logEntry(sheet, data.phone, data.keyword, 'Duplicate - User already in group.');
+      return;
+    }
+    if (isDuplicate === null) {
+      logEntry(sheet, data.phone, data.keyword, 'Error: GroupMe duplicate check failed.');
+      return;
+    }
 
-  // --- Perform duplicate check and add user ---
-  const isDuplicate = checkGroupMeDuplicate(config.token, groupId, data.phone);
-  if (isDuplicate === null) {
-    logEntry(sheet, data.phone, data.keyword, 'Error: GroupMe duplicate check failed.');
-    return;
-  }
-  if (isDuplicate) {
-    logEntry(sheet, data.phone, data.keyword, 'Duplicate - User already in group.');
-    return;
-  }
+    if (!membersByGroup[groupConfig.groupId]) {
+      membersByGroup[groupConfig.groupId] = {
+        members: [],
+        config: groupConfig,
+        keyword: data.keyword // Store keyword for logging
+      };
+    }
+    membersByGroup[groupConfig.groupId].members.push({ phone_number: data.phone });
+  });
 
-  // Add user to the group
-  const addResult = addToGroupMe(config.token, groupId, data.phone, prefix, count);
-  logEntry(sheet, data.phone, data.keyword, addResult.status);
+  // --- 2. Process each group's batch ---
+  for (const groupId in membersByGroup) {
+    const groupData = membersByGroup[groupId];
+    const groupConfig = groupData.config;
+    const membersToAdd = groupData.members;
+    
+    const prefix = groupConfig.prefix || config.userPrefix;
+    const useGroupSpecificCounter = groupConfig.count !== undefined;
+    let currentCount = useGroupSpecificCounter ? groupConfig.count : config.userCount;
 
-  // --- Increment the correct counter on success ---
-  if (addResult.success) {
-    const properties = PropertiesService.getScriptProperties();
-    if (useGroupSpecificCounter) {
-      // Find the group in the original array, increment its count, and save the whole array back.
-      const groupConfigs = JSON.parse(properties.getProperty('GROUPME_ADDER_CONFIG') || '[]');
-      const groupIndex = groupConfigs.findIndex(g => g.groupId === groupId);
-      
-      if (groupIndex !== -1) {
-        // The count to save is the one we just used, plus one.
-        const newCount = (groupConfig.count || 0) + 1;
-        groupConfigs[groupIndex].count = newCount;
-        properties.setProperty('GROUPME_ADDER_CONFIG', JSON.stringify(groupConfigs, null, 2));
-        
-        // --- FIX --- Update the in-memory config object for the next loop iteration.
-        config.groupMeConfig[groupIndex].count = newCount;
-        
-        Logger.log(`Group-specific count for group ${groupId} incremented to ${newCount}`);
+    // Assign nicknames to members
+    const membersWithNicknames = membersToAdd.map(member => {
+      const nickname = prefix + currentCount;
+      currentCount++;
+      return { ...member, nickname: nickname };
+    });
+
+    // Add members in a single API call
+    const addResult = addToGroupMe(config.token, groupId, membersWithNicknames);
+    
+    // Log the result for all members in this batch
+    const finalNicknames = membersWithNicknames.map(m => m.nickname).join(', ');
+    const statusMessage = addResult.success 
+      ? `Success - Batch added ${membersWithNicknames.length} members as: ${finalNicknames}`
+      : `Error - Batch add failed: ${addResult.status}`;
+    
+    membersToAdd.forEach(member => {
+      logEntry(sheet, member.phone_number, groupData.keyword, statusMessage);
+    });
+
+    // --- 3. Increment and save the counter on success ---
+    if (addResult.success) {
+      const properties = PropertiesService.getScriptProperties();
+      if (useGroupSpecificCounter) {
+        const groupConfigs = JSON.parse(properties.getProperty('GROUPME_ADDER_CONFIG') || '[]');
+        const groupIndex = groupConfigs.findIndex(g => g.groupId === groupId);
+        if (groupIndex !== -1) {
+          groupConfigs[groupIndex].count = currentCount;
+          properties.setProperty('GROUPME_ADDER_CONFIG', JSON.stringify(groupConfigs, null, 2));
+          config.groupMeConfig[groupIndex].count = currentCount; // Update in-memory config
+          Logger.log(`Group-specific count for group ${groupId} updated to ${currentCount}`);
+        }
+      } else {
+        properties.setProperty('USER_COUNT', currentCount.toString());
+        config.userCount = currentCount; // Update in-memory config
+        Logger.log(`Global USER_COUNT updated to ${currentCount}`);
       }
-    } else {
-      // Increment the global counter
-      const newCount = config.userCount + 1;
-      properties.setProperty('USER_COUNT', newCount.toString());
-      
-      // --- FIX --- Update the in-memory global count for the next loop iteration.
-      config.userCount = newCount;
-      
-      Logger.log(`Global USER_COUNT incremented to ${newCount}`);
     }
   }
 }
+
 
 /**
  * MODULE: A sample module to demonstrate extensibility.
@@ -323,25 +353,21 @@ function postGroupMeMessage(token, groupId, text) {
 }
 
 /**
- * Adds a phone number to a specific GroupMe group with a generated nickname.
+ * Adds one or more members to a specific GroupMe group.
  * @param {string} token - The GroupMe API token.
- * @param {string} groupId - The ID of the group to add the user to.
- * @param {string} phoneE164 - The user's phone number in E.164 format.
- * @param {string} prefix - The prefix for the user's nickname.
- * @param {number|string} count - The current user count for the nickname.
+ * @param {string} groupId - The ID of the group to add members to.
+ * @param {Array<object>} members - An array of member objects to add, e.g., [{nickname: 'User1', phone_number: '+1...'}].
  * @return {object} An object with the status and success of the add operation.
  */
-function addToGroupMe(token, groupId, phoneE164, prefix, count) {
+function addToGroupMe(token, groupId, members) {
   try {
-    const nickname = prefix + count;
-    const guid = `guid-${new Date().getTime()}-${Math.random()}`;
-    const payload = {
-      members: [{
-        phone_number: phoneE164,
-        nickname: nickname,
-        guid: guid
-      }]
-    };
+    // Add a unique guid to each member for idempotency
+    const membersWithGuid = members.map(m => ({
+      ...m,
+      guid: `guid-${new Date().getTime()}-${Math.random()}`
+    }));
+
+    const payload = { members: membersWithGuid };
     const options = {
       method: 'post',
       contentType: 'application/json',
@@ -351,8 +377,9 @@ function addToGroupMe(token, groupId, phoneE164, prefix, count) {
     const url = `https://api.groupme.com/v3/groups/${groupId}/members/add?token=${token}`;
     const response = UrlFetchApp.fetch(url, options);
     const code = response.getResponseCode();
-    if (code >= 200 && code < 300) {
-      return { success: true, status: `Success - Added as ${nickname}` };
+    
+    if (code === 202) { // 202 Accepted is the success code for this endpoint
+      return { success: true, status: 'Success - Add request accepted.' };
     } else {
       const responseText = response.getContentText();
       Logger.log(`GroupMe add failed: ${code} - ${responseText}`);
