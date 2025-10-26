@@ -183,6 +183,12 @@
           <label for="count">Custom Count</label>
           <input type="number" id="count" placeholder="Leave blank to use global">
         </div>
+        <div class="form-group">
+          <label style="display: flex; align-items: center; cursor: pointer;">
+            <input type="checkbox" id="useBatchAdd" style="margin-right: 0.5rem;">
+            Use Batch Add API (recommended)
+          </label>
+        </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Group</button>
@@ -200,6 +206,7 @@
         <span><span class="label">ID:</span> <span class="groupId"></span></span>
         <span><span class="label">Prefix:</span> <span class="prefix"></span></span>
         <span><span class="label">Count:</span> <span class="count"></span></span>
+        <span><span class="label">Add Method:</span> <span class="addMethod"></span></span>
       </div>
       <div class="group-actions">
         <button class="btn btn-secondary edit-btn">Edit</button>
@@ -246,6 +253,7 @@
         clone.querySelector('.groupId').textContent = group.groupId;
         clone.querySelector('.prefix').textContent = group.prefix || '(Global)';
         clone.querySelector('.count').textContent = group.count || '(Global)';
+        clone.querySelector('.addMethod').textContent = group.useBatchAdd === false ? 'One-by-one' : 'Batch';
         
         const editBtn = clone.querySelector('.edit-btn');
         editBtn.dataset.groupId = group.groupId;
@@ -270,10 +278,12 @@
         document.getElementById('groupId').value = group.groupId;
         document.getElementById('prefix').value = group.prefix || '';
         document.getElementById('count').value = group.count || '';
+        document.getElementById('useBatchAdd').checked = group.useBatchAdd !== false; // Default to true if undefined
       } else {
         modalTitle.textContent = 'Add New Group';
         document.getElementById('original-group-id').value = '';
         document.getElementById('original-keywords-str').value = '';
+        document.getElementById('useBatchAdd').checked = true; // Default to batch for new groups
       }
       modal.style.display = 'flex';
     }
@@ -318,6 +328,7 @@
         groupId: document.getElementById('groupId').value,
         prefix: document.getElementById('prefix').value,
         count: document.getElementById('count').value,
+        useBatchAdd: document.getElementById('useBatchAdd').checked,
         originalGroupId: document.getElementById('original-group-id').value,
         originalKeywordsStr: document.getElementById('original-keywords-str').value,
       };

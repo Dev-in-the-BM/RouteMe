@@ -73,6 +73,7 @@ function saveGroup(groupData) {
     groupId: groupData.groupId,
     prefix: groupData.prefix || '',
     count: groupData.count ? parseInt(groupData.count, 10) : undefined,
+    useBatchAdd: groupData.useBatchAdd
   };
 
   // Find and update the existing group, or add it if it's new
