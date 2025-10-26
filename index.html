@@ -2,198 +2,238 @@
 <html>
 <head>
   <base target="_top">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
     :root {
-      --primary-color: #4a90e2;
-      --success-color: #4CAF50;
-      --danger-color: #f44336;
-      --light-gray: #f4f4f9;
-      --medium-gray: #e0e0e0;
-      --dark-gray: #555;
-      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+      --primary-color: #007bff;
+      --secondary-color: #6c757d;
+      --success-color: #28a745;
+      --danger-color: #dc3545;
+      --light-color: #f8f9fa;
+      --dark-color: #343a40;
+      --font-color: #333;
     }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--light-gray);
-      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      color: var(--font-color);
       padding: 2rem;
     }
+
     .container {
       max-width: 900px;
       margin: auto;
-      display: grid;
-      gap: 2rem;
+      animation: fadeIn 0.8s ease-in-out;
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .card {
-      background: white;
-      padding: 1.5rem 2rem;
-      border-radius: 12px;
-      box-shadow: var(--shadow);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
+    }
+
     .card-header {
+      background-color: rgba(0, 123, 255, 0.8);
+      color: white;
+      border-bottom: none;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+    }
+    
+    .form-control, .form-select {
+      background-color: rgba(255, 255, 255, 0.7);
+      color: var(--dark-color);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background-color: rgba(255, 255, 255, 0.9);
+      color: var(--dark-color);
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+    }
+
+    .btn {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+    }
+
+    .group-item {
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 1px solid var(--medium-gray);
-    }
-    h1, h2 {
-      margin: 0;
-      color: #333;
-    }
-    h2 { font-size: 1.5rem; }
-    .btn {
-      padding: 0.6rem 1.2rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
-    .btn-primary { background-color: var(--primary-color); color: white; }
-    .btn-primary:hover { background-color: #357ABD; }
-    .btn-success { background-color: var(--success-color); color: white; }
-    .btn-success:hover { background-color: #45a049; }
-    .btn-danger { background-color: var(--danger-color); color: white; }
-    .btn-danger:hover { background-color: #d32f2f; }
-    .btn-secondary { background-color: #ccc; color: #333; }
-    .btn-secondary:hover { background-color: #bbb; }
-
-    /* Group List */
-    #group-list { display: grid; gap: 1rem; }
-    .group-item {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      padding: 1rem;
-      border: 1px solid var(--medium-gray);
-      border-radius: 8px;
-    }
-    .group-details { font-family: 'SF Mono', 'Courier New', monospace; font-size: 0.9rem; }
-    .group-details span { display: block; margin-bottom: 0.25rem; }
-    .group-details .keywords { font-weight: bold; color: #333; font-size: 1.1rem; }
-    .group-details .label { font-weight: 600; color: var(--dark-gray); }
-    .group-actions { display: flex; gap: 0.5rem; }
-
-    /* Form Styles */
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-    .form-group { margin-bottom: 1rem; }
-    label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #444; }
-    input[type="text"], input[type="number"] {
-      width: 100%;
-      padding: 0.7rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-sizing: border-box;
-      font-size: 1rem;
+      transition: all 0.3s ease;
+      animation: slideIn 0.5s forwards;
+      opacity: 0;
     }
 
-    /* Modal Styles */
-    .modal-backdrop {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: none; align-items: center; justify-content: center;
+    @keyframes slideIn {
+        from { transform: translateX(-20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
+    
+    .group-item:hover {
+        background-color: rgba(255, 255, 255, 1);
+        transform: scale(1.02);
+    }
+
     .modal-content {
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 500px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
     }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; }
-
-    /* Toasts */
+    
     #toast {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
       padding: 1rem 2rem;
       border-radius: 8px;
       color: white;
       font-weight: 600;
-      box-shadow: var(--shadow);
-      opacity: 0;
-      transition: opacity 0.3s, bottom 0.3s;
-      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      z-index: 1060;
     }
-    #toast.show { opacity: 1; bottom: 30px; }
+    #toast.show {
+      bottom: 30px;
+    }
+
+    .loader {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.7);
+        display: flex; align-items: center; justify-content: center; z-index: 9999;
+        transition: opacity 0.3s;
+    }
+
   </style>
 </head>
 <body>
+  <div id="loader" class="loader">
+      <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+      </div>
+  </div>
+
   <div class="container">
-    <h1>🤖 GroupMe Bot Settings</h1>
+    <div class="text-center my-4">
+      <h1 class="display-4">🤖 GroupMe Bot Settings</h1>
+    </div>
 
     <div class="card">
       <div class="card-header">
         <h2>Global Settings</h2>
-        <button id="save-global-btn" class="btn btn-primary">Save Globals</button>
       </div>
-      <div id="global-settings-form" class="form-grid">
-        <div class="form-group">
-          <label for="USER_PREFIX">Fallback User Prefix</label>
-          <input type="text" id="USER_PREFIX">
+      <div class="card-body">
+        <div id="global-settings-form" class="row g-3">
+          <div class="col-md-4">
+            <label for="USER_PREFIX" class="form-label">Fallback User Prefix</label>
+            <input type="text" class="form-control" id="USER_PREFIX">
+          </div>
+          <div class="col-md-4">
+            <label for="USER_COUNT" class="form-label">Fallback User Count</label>
+            <input type="number" class="form-control" id="USER_COUNT">
+          </div>
+          <div class="col-md-4">
+            <label for="SHMUZTECH_COUNT" class="form-label">ShmuzTech Onboarding Count</label>
+            <input type="number" class="form-control" id="SHMUZTECH_COUNT">
+          </div>
         </div>
-        <div class="form-group">
-          <label for="USER_COUNT">Fallback User Count</label>
-          <input type="number" id="USER_COUNT">
-        </div>
-         <div class="form-group">
-          <label for="SHMUZTECH_COUNT">ShmuzTech Onboarding Count</label>
-          <input type="number" id="SHMUZTECH_COUNT">
+         <div class="d-flex justify-content-end mt-3">
+            <button id="save-global-btn" class="btn btn-primary">Save Globals</button>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-header">
+      <div class="card-header d-flex justify-content-between align-items-center">
         <h2>Group Management</h2>
-        <button id="add-group-btn" class="btn btn-success">Add New Group</button>
+        <button id="add-group-btn" class="btn btn-primary">Add New Group</button>
       </div>
-      <div id="group-list">
-        </div>
+      <div class="card-body">
+        <div id="group-list"></div>
+      </div>
     </div>
   </div>
 
-  <div id="group-modal" class="modal-backdrop">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 id="modal-title">Add New Group</h2>
-        <h2 style="cursor:pointer;" onclick="closeModal()">×</h2>
+  <div class="modal fade" id="group-modal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal-title">Add New Group</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="group-form">
+            <input type="hidden" id="original-group-id">
+            <input type="hidden" id="original-keywords-str">
+            <div class="mb-3">
+              <label for="keywords" class="form-label">Keywords (comma-separated)</label>
+              <input type="text" class="form-control" id="keywords" required>
+            </div>
+            <div class="mb-3">
+              <label for="groupId" class="form-label">Group ID</label>
+              <input type="text" class="form-control" id="groupId" required>
+            </div>
+            <hr>
+            <p class="text-muted">Optional: Override global settings for this group.</p>
+            <div class="row">
+              <div class="col">
+                <label for="prefix" class="form-label">Custom Prefix</label>
+                <input type="text" class="form-control" id="prefix" placeholder="Leave blank to use global">
+              </div>
+              <div class="col">
+                <label for="count" class="form-label">Custom Count</label>
+                <input type="number" class="form-control" id="count" placeholder="Leave blank to use global">
+              </div>
+            </div>
+            <div class="form-check mt-3">
+              <input class="form-check-input" type="checkbox" id="useBatchAdd">
+              <label class="form-check-label" for="useBatchAdd">
+                Use Batch Add API (recommended)
+              </label>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" form="group-form" class="btn btn-primary">Save Group</button>
+        </div>
       </div>
-      <form id="group-form">
-        <input type="hidden" id="original-group-id">
-        <input type="hidden" id="original-keywords-str">
-        <div class="form-group">
-          <label for="keywords">Keywords (comma-separated)</label>
-          <input type="text" id="keywords" required>
-        </div>
-        <div class="form-group">
-          <label for="groupId">Group ID</label>
-          <input type="text" id="groupId" required>
-        </div>
-        <p style="color:#777; font-size:0.9rem;">Optional: Override global settings for this group.</p>
-        <div class="form-group">
-          <label for="prefix">Custom Prefix</label>
-          <input type="text" id="prefix" placeholder="Leave blank to use global">
-        </div>
-        <div class="form-group">
-          <label for="count">Custom Count</label>
-          <input type="number" id="count" placeholder="Leave blank to use global">
-        </div>
-        <div class="form-group">
-          <label style="display: flex; align-items: center; cursor: pointer;">
-            <input type="checkbox" id="useBatchAdd" style="margin-right: 0.5rem;">
-            Use Batch Add API (recommended)
-          </label>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Group</button>
-        </div>
-      </form>
     </div>
   </div>
   
@@ -201,54 +241,58 @@
 
   <template id="group-template">
     <div class="group-item">
-      <div class="group-details">
-        <span class="keywords"></span>
-        <span><span class="label">ID:</span> <span class="groupId"></span></span>
-        <span><span class="label">Prefix:</span> <span class="prefix"></span></span>
-        <span><span class="label">Count:</span> <span class="count"></span></span>
-        <span><span class="label">Add Method:</span> <span class="addMethod"></span></span>
+      <div>
+        <h5 class="keywords mb-1"></h5>
+        <small class="text-muted">ID: <span class="groupId"></span></small>
+        <small class="text-muted ms-2">Prefix: <span class="prefix"></span></small>
+        <small class="text-muted ms-2">Count: <span class="count"></span></small>
+        <small class="text-muted ms-2">Add Method: <span class="addMethod"></span></small>
       </div>
       <div class="group-actions">
-        <button class="btn btn-secondary edit-btn">Edit</button>
-        <button class="btn btn-danger delete-btn">Delete</button>
+        <button class="btn btn-outline-primary btn-sm edit-btn">Edit</button>
+        <button class="btn btn-outline-danger btn-sm delete-btn ms-2">Delete</button>
       </div>
     </div>
   </template>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
   <script>
     let currentGroups = [];
     const groupList = document.getElementById('group-list');
     const groupTemplate = document.getElementById('group-template');
-    const modal = document.getElementById('group-modal');
+    const groupModal = new bootstrap.Modal(document.getElementById('group-modal'));
     const modalTitle = document.getElementById('modal-title');
     const groupForm = document.getElementById('group-form');
     const toast = document.getElementById('toast');
+    const loader = document.getElementById('loader');
+
+    function showLoader() { loader.style.opacity = '1'; loader.style.pointerEvents = 'auto'; }
+    function hideLoader() { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }
 
     // --- Data Fetching and Rendering ---
     document.addEventListener('DOMContentLoaded', () => {
-      loadGlobalSettings();
-      loadGroups();
-    });
-
-    function loadGlobalSettings() {
-      google.script.run.withSuccessHandler(settings => {
+      showLoader();
+      Promise.all([
+        new Promise(resolve => google.script.run.withSuccessHandler(resolve).getGlobalSettings()),
+        new Promise(resolve => google.script.run.withSuccessHandler(resolve).getGroupConfigs())
+      ]).then(([settings, groups]) => {
         document.getElementById('USER_PREFIX').value = settings.USER_PREFIX;
         document.getElementById('USER_COUNT').value = settings.USER_COUNT;
         document.getElementById('SHMUZTECH_COUNT').value = settings.SHMUZTECH_COUNT;
-      }).getGlobalSettings();
-    }
-
-    function loadGroups() {
-      google.script.run.withSuccessHandler(groups => {
+        
         currentGroups = groups;
         renderGroups();
-      }).getGroupConfigs();
-    }
-    
+        hideLoader();
+      });
+    });
+
     function renderGroups() {
       groupList.innerHTML = '';
-      currentGroups.forEach(group => {
+      currentGroups.forEach((group, index) => {
         const clone = groupTemplate.content.cloneNode(true);
+        const groupItem = clone.querySelector('.group-item');
+        groupItem.style.animationDelay = `${index * 0.1}s`;
+
         clone.querySelector('.keywords').textContent = group.keywords.join(', ');
         clone.querySelector('.groupId').textContent = group.groupId;
         clone.querySelector('.prefix').textContent = group.prefix || '(Global)';
@@ -278,30 +322,34 @@
         document.getElementById('groupId').value = group.groupId;
         document.getElementById('prefix').value = group.prefix || '';
         document.getElementById('count').value = group.count || '';
-        document.getElementById('useBatchAdd').checked = group.useBatchAdd !== false; // Default to true if undefined
+        document.getElementById('useBatchAdd').checked = group.useBatchAdd !== false;
       } else {
         modalTitle.textContent = 'Add New Group';
         document.getElementById('original-group-id').value = '';
         document.getElementById('original-keywords-str').value = '';
-        document.getElementById('useBatchAdd').checked = true; // Default to batch for new groups
+        document.getElementById('useBatchAdd').checked = true;
       }
-      modal.style.display = 'flex';
+      groupModal.show();
     }
 
     function closeModal() {
-      modal.style.display = 'none';
+      groupModal.hide();
     }
 
     // --- Event Handlers ---
     document.getElementById('add-group-btn').addEventListener('click', () => openModal('add'));
     
     document.getElementById('save-global-btn').addEventListener('click', () => {
+      showLoader();
       const settings = {
         USER_PREFIX: document.getElementById('USER_PREFIX').value,
         USER_COUNT: document.getElementById('USER_COUNT').value,
         SHMUZTECH_COUNT: document.getElementById('SHMUZTECH_COUNT').value,
       };
-      google.script.run.withSuccessHandler(() => showToast('Global settings saved!')).saveGlobalSettings(settings);
+      google.script.run.withSuccessHandler(() => {
+          showToast('Global settings saved!');
+          hideLoader();
+      }).saveGlobalSettings(settings);
     });
 
     function handleEdit(e) {
@@ -314,15 +362,18 @@
       const groupId = e.target.dataset.groupId;
       const group = currentGroups.find(g => g.groupId === groupId);
       if (confirm(`Are you sure you want to delete the group for keywords "${group.keywords.join(', ')}"?`)) {
+        showLoader();
         google.script.run.withSuccessHandler(message => {
           showToast(message);
           loadGroups();
+          hideLoader();
         }).deleteGroup(groupId);
       }
     }
     
     groupForm.addEventListener('submit', e => {
       e.preventDefault();
+      showLoader();
       const groupData = {
         keywords: document.getElementById('keywords').value,
         groupId: document.getElementById('groupId').value,
@@ -337,16 +388,21 @@
         showToast(message);
         loadGroups();
         closeModal();
+        hideLoader();
       }).saveGroup(groupData);
     });
     
     // --- UI Feedback ---
     function showToast(message, isError = false) {
       toast.textContent = message;
-      toast.style.backgroundColor = isError ? 'var(--danger-color)' : 'var(--success-color)';
-      toast.classList.add('show');
+      toast.className = 'toast'; // reset classes
+      toast.classList.add(isError ? 'bg-danger' : 'bg-success', 'show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
+    
+    document.querySelector('.modal-footer .btn-secondary').addEventListener('click', closeModal);
+    document.querySelector('.modal-header .btn-close').addEventListener('click', closeModal);
+
   </script>
 </body>
 </html>
