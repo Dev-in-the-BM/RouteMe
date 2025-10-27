@@ -1,73 +1,98 @@
-# 💬 RouteMe: Easy GroupMe Auto-Add from Google Voice Texts
+# 🚀 RouteMe: Automate GroupMe Invites via Google Voice
 
-RouteMe is a simple Google Apps Script (GAS) that makes adding people to your GroupMe groups automatic.
+RouteMe is a Google Apps Script that automatically adds people to your GroupMe groups when they text a keyword to your Google Voice number.
 
-**The idea is simple:** Someone texts a **keyword** (like "join") to your Google Voice number, and the script instantly adds them to the correct GroupMe chat.
-
----
-
-## ✨ What This Script Does
-
-* **Auto-Add by Text:** If a text has a keyword you set (e.g., `info`), the script finds the user's phone number and adds them to the linked GroupMe group.
-* **Settings Website:** You get a simple website to change all the settings, link keywords to groups, and set your token.
-* **Anonymous Nicknames:** The script gives new members sequential nicknames (like "**User1** ," "**User2** ") using a prefix you choose. This helps **anonymize** users while making sure everyone has a different name.
-* **Logging:** Every add or error is written to a special **Google Sheet log file** so you can see exactly what happened.
+**The concept is simple:** Someone texts "join" to your Google Voice number, and the script instantly adds them to your designated GroupMe chat.
 
 ---
 
-## ⚙️ How to Set It Up (The Quick Way)
+## ✨ Core Features
 
-### Step 1: Create the Project
+*   **Keyword-Based Invites:** Link keywords (e.g., `news`, `updates`) to specific GroupMe groups.
+*   **Web-Based Settings:** A user-friendly website to manage your settings, keywords, and groups.
+*   **Anonymous Nicknames:** Automatically assign sequential nicknames (e.g., "User1", "User2") to new members.
+*   **Detailed Logging:** Every action is recorded in a Google Sheet for easy monitoring and troubleshooting.
 
-1. Go to [Google Apps Script](https://script.google.com/home/start) and click **"New project."**
-2. You have a file named `Code.gs`.
-3. Click the `+` icon next to **Files** to add two more:
-   * One **Script file (.gs)** named **`WebApp.gs`** .
-   * One **HTML file (.html)** named **`Index`** .
+---
+
+## 📋 Before You Begin
+
+Make sure you have the following:
+
+*   A GroupMe Account.
+*   A Google Account.
+*   A Google Voice number associated with your Google Account.
+*   Your [GroupMe Access Token](https://dev.groupme.com/applications).
+*   **Email forwarding for Google Voice messages enabled.** You can check this in your Google Voice settings under "Messages" and ensure "Forward messages to email" is turned on.
+
+---
+
+## ⚙️ Step-by-Step Setup Guide
+
+### Step 1: Create the Google Apps Script Project
+
+First, we need to create a new project in Google Apps Script and add the necessary files.
+
+1.  Go to [script.google.com](https://script.google.com/home/start) and click **New project**.
+2.  You will see a file named `Code.gs`.
+3.  Click the **+** icon next to **Files** and add two more files:
+    *   A **Script** file named `WebApp.gs`.
+    *   An **HTML** file named `index.html`.
+
+*You should now have three files in your project: `Code.gs`, `WebApp.gs`, and `index.html`.*
 
 ### Step 2: Copy the Code
 
-Copy the full contents of your three files (`code.gs`, `WebApp.gs`, `index.html`) into the matching files in your new GAS project.
+Copy the contents of the files from this project into the corresponding files in your new Google Apps Script project.
+
+1.  Copy the content of `code.gs` into your `Code.gs` file.
+2.  Copy the content of `WebApp.gs` into your `WebApp.gs` file.
+3.  Copy the content of `index.html` into your `index.html` file.
 
 ### Step 3: Deploy the Web App
 
-You must deploy the script to get the URL for your settings website.
+Next, we need to "deploy" the script. This makes the settings website accessible via a private URL.
 
-1. Click the **"Deploy"** button (top right) and choose **"New deployment."**
-2. In the "Select type" gear icon, choose **"Web app."**
-3. Set **"Execute as"** to **"Me."**
-4. Set **"Who has access"** to **"Only myself"** .
-5. Click **"Deploy."**
-6. A **"Web app URL"** will appear. **Save this URL!** This is where you will configure your bot.
+1.  At the top right, click **Deploy** and select **New deployment**.
+2.  Click the gear icon next to "Select type" and choose **Web app**.
+3.  Configure the web app settings:
+    *   **Execute as:** `Me`
+    *   **Who has access:** `Only myself`
+4.  Click **Deploy**.
+5.  **Important:** A "Web app URL" will be displayed. **Copy and save this URL.** This is the link to your private settings page.
 
-### Step 4: Configure on the Website
+### Step 4: Configure the Script via the Web App
 
-Open the **Web app URL** you saved from Step 3.
+Now we'll use the web app you just deployed to complete the setup.
 
-1.  **First-Time Setup:** The first time you open the web app, you will see a "One-Time Setup" card. Click the **"Run Automated Setup"** button. This will:
-    *   Create the logging spreadsheet.
-    *   Set up a timer to automatically check for new messages every 5 minutes.
-    *   You will be asked to authorize the script. Please grant the necessary permissions.
-2.  **Access Token:** After the setup is complete, the main settings will appear. Paste your personal **GroupMe Access Token** into the top field and click **"Save Token"**.
-3.  **Global Settings:** Set a **Fallback User Prefix** (e.g., `Guest`) and **Fallback User Count** (e.g., `1`).
-4.  **Group Management:** Click **"Add New Group."**
-5.  **Keywords:** Type the word(s) users will text (e.g., `daily, tech, join`), separated by commas.
-6.  **Group:** Pick the GroupMe chat you want to link to those keywords.
-7.  **Add Method:** Review the differences below for the **"Use Batch Add API"** option:
+1.  **Open the Web App URL** you saved in the previous step.
+2.  **Run the Automated Setup:**
+    *   You will see a "One-Time Setup" card. Click the **Run Automated Setup** button.
+    *   This will automatically:
+        *   Create a Google Sheet to log all activity.
+        *   Create a trigger to check for new text messages every 5 minutes.
+    *   A pop-up will ask for permissions. **You must click "Review permissions" and "Allow"** for the script to work.
+3.  **Enter Your GroupMe Access Token:**
+    *   Once the setup is complete, the main settings will appear.
+    *   Paste your **GroupMe Access Token** into the "GroupMe Access Token" field and click **Save Token**.
+4.  **Add Your First Group:**
+    *   Click **Add New Group**.
+    *   **Keywords:** Enter the keywords you want to trigger the invite, separated by commas (e.g., `join, news, updates`).
+    *   **Group:** Select the GroupMe group you want to link to these keywords.
+    *   Click **Save Group**.
 
-<details>
+---
 
-<summary><strong>GroupMe Batch Add API vs. One-by-One Explained (Important!)</strong></summary>
+## ✅ That's It!
 
-This option controls the method the script uses to talk to GroupMe's servers.
+Your bot is now live! When someone texts one of your keywords to your Google Voice number, they will be automatically added to the corresponding GroupMe group.
 
-| **Option**                   | **How It Works**                                                                                                     | **Experience for the Group/User**                                                                                                                                                                   |
-| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Checked (ON)** - *Recommended* | Uses the GroupMe **Batch Add API** . This sends all add requests to GroupMe at once to process quietly in the background. | **No system messages** ("User was added") are posted in the chat, keeping the chat feed clean. The new user will **not** get a notification they were added, and won't know until someone in the group posts a message. |
-| **Unchecked (OFF)**               | Adds each person **one at a time** using a slower method. The script pauses for half a second between each add.           | A **system message** is posted in the chat for every new member, which can clutter the chat. The new user **will** receive the standard GroupMe notification that they were added to the group.         |
+---
 
-</details>
+## 🤔 Troubleshooting
 
-8. Click **"Save Group."**
+*   **"Authorization is required" error:** If you see this, it means you need to grant permissions to the script. Follow the on-screen instructions to authorize it.
+*   **Changes not appearing:** If you make changes to the code, you will need to create a new deployment to see the changes reflected in the web app. Go to **Deploy > Manage deployments**, select your deployment, and click the pencil icon to create a new version.
+*   **Check the logs:** If you encounter any issues, the first place to look is the "Logs" sheet in your "GroupMe Bot Logs" Google Sheet. It will tell you what the script is doing and if there are any errors.
 
-**The bot is now live!** It will run on the schedule you set to process new text messages.
+![Visitor Count](https://komarev.com/ghpvc/?username=Dev-in-the-BM&label=Repo%20Visitors&color=blueviolet&style=flat-square)
