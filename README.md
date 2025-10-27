@@ -1,4 +1,4 @@
-<p align="center"><img src="https://github.com/Dev-in-the-BM/RouteMe/blob/main/RouteMe.png?raw=true" alt="RouteMe Logo"></p>
+<p align="center"><a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=800&size=25&pause=1000&color=1766FA&background=1766FA00&center=true&vCenter=true&width=700&lines=RouteMe;Automate+GroupMe+Invites+via+Google+Voice" alt="Typing SVG" /></a></p>
 
 # <img src="https://github.com/Dev-in-the-BM/RouteMe/blob/main/RouteMe.png?raw=true" alt="Rocket" width="25" height="25" /> RouteMe: Automate GroupMe Invites via Google Voice
 
@@ -97,7 +97,6 @@ Your bot is now live! When someone texts one of your keywords to your Google Voi
 * **Changes not appearing:** If you make changes to the code, you will need to create a new deployment to see the changes reflected in the web app. Go to **Deploy > Manage deployments**, select your deployment, and click the pencil icon to create a new version.
 * **Check the logs:** If you encounter any issues, the first place to look is the "Logs" sheet in your "GroupMe Bot Logs" Google Sheet. It will tell you what the script is doing and if there are any errors.
   
-  [![HitCount](https://hits.dwyl.com/dev-in-the-bm/routeme.svg?style=flat-square)](http://hits.dwyl.com/dev-in-the-bm/routeme)
   
   
   [![HitCount](https://hits.dwyl.com/dev-in-the-bm/routeme.svg?style=flat-square&show=unique)](http://hits.dwyl.com/dev-in-the-bm/routeme)
