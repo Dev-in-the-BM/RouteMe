@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev-in-the-BM | Yeshiva Bochur & Vibe Coder</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/TextPlugin.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Ubuntu+Mono:wght@400;700&display=swap');
+        
+        :root {
+            --bg-primary: #000000;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent: #a855f7;
+            --accent-hover: #c084fc;
+            --accent-secondary: #3b82f6;
+            --border: #334155;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        #main-container {
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Enhanced Custom Cursor */
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: all 0.15s ease;
+            mix-blend-mode: difference;
+        }
+        
+        .cursor-follower {
+            width: 40px;
+            height: 40px;
+            background: rgba(168, 85, 247, 0.2);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: all 0.4s cubic-bezier(0.75, -0.5, 0.25, 1.5);
+        }
+
+        .cursor-trail {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9997;
+            opacity: 0.6;
+        }
+
+        body.terminal-hover .custom-cursor,
+        body.terminal-hover .cursor-follower,
+        body.terminal-hover .cursor-trail {
+            display: none;
+        }
+        
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #ec4899 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 4s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .card {
+            background: rgba(38, 38, 38, 0.6);
+            backdrop-filter: blur(15px) saturate(120%);
+            -webkit-backdrop-filter: blur(15px) saturate(120%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 24px;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            will-change: transform;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .card:hover::before {
+            left: 100%;
+        }
+        
+        .card:hover {
+            border-color: var(--accent);
+            transform: scale(1.08);
+            box-shadow: 0 25px 50px rgba(168, 85, 247, 0.3);
+        }
+
+        /* Specific hover for sponsor cards */
+        .sponsor-card:hover {
+            transform: scale(1.08);
+            border-color: var(--accent);
+        }
+
+        a,
+        .nav-link,
+        .btn-primary,
+        .btn-secondary,
+        .skill-badge,
+        .card {
+            cursor: pointer;
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        
+        .nav-link:hover::after {
+            width: 80%;
+        }
+        
+        .nav-link:hover {
+            background: rgba(168, 85, 247, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .skill-badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
+        }
+        
+        .skill-badge:hover {
+            border-color: var(--accent);
+            transform: scale(1.1);
+            box-shadow: 0 10px 20px rgba(168, 85, 247, 0.3);
+        }
+        
+        .project-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 24px;
+            overflow: hidden; 
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+            will-change: transform;
+        }
+        
+        .project-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(168, 85, 247, 0.15), transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .project-card:hover::after {
+            opacity: 1;
+        }
+        
+        .project-card:hover {
+            border-color: var(--accent);
+            transform: scale(1.07);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600; 
+            transition: all 0.5s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-4px) scale(1.1);
+            box-shadow: 0 15px 30px rgba(168, 85, 247, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600; 
+            transition: all 0.5s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            will-change: transform;
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px rgba(168, 85, 247, 0.2);
+        }
+        
+        .terminal {
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            font-family: 'Ubuntu Mono', monospace;
+            font-size: 18px;
+            overflow: hidden;
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-content {
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .terminal-content p {
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .terminal:hover {
+            cursor: text;
+        }
+        .terminal-header {
+            background: #161b22;
+            padding: 12px 20px;
+            border-bottom: 1px solid #444;
+            display: flex;
+            align-items: center;
+            position: relative;
+            justify-content: flex-end;
+        }
+        
+        .terminal-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bar__button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #333;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .bar__button:hover {
+            background-color: #444;
+            transform: scale(1.2);
+        }
+
+        .bar__button--exit:hover {
+            background-color: #e04040;
+        }
+
+        .prompt-user { color: #5555FF; }
+        .prompt-at { color: #FFFF55; }
+        .prompt-hostname { color: #FF5555; }
+        .prompt-directory { color: #55FF55; }
+        .prompt-dollar { color: #FFFF55; }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { 
+                box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+                filter: brightness(1);
+            }
+            to { 
+                box-shadow: 0 0 30px rgba(168, 85, 247, 0.9), 0 0 60px rgba(168, 85, 247, 0.6);
+                filter: brightness(1.3);
+            }
+        }
+        
+        .typing-effect {
+            border-right: 3px solid var(--accent);
+            animation: blink 1s infinite;
+        }
+
+        .blinking-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background-color: var(--text-secondary);
+            animation: blink 0.8s infinite;
+            vertical-align: middle;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .emoji-bounce {
+            animation: bounce 2s infinite;
+        }
+
+        .inline-emoji {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        @keyframes strong-bounce {
+            0%, 100% {
+                transform: translateY(-45%);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            50% {
+                transform: translateY(0);
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+        }
+        .animate-strong-bounce {
+            animation: strong-bounce 1s infinite;
+        }
+
+        .scroll-indicator {
+            animation: bounce 2s infinite;
+        }
+        
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)) padding-box,
+                        linear-gradient(135deg, var(--accent), var(--accent-secondary), var(--accent)) border-box;
+            border: 2px solid transparent;
+            border-radius: 24px;
+            background-size: 200% 200%; 
+            transition: background-position 0.8s ease, transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gradient-border:hover {
+            background-position: 100% 100%;
+            transform: scale(1.04);
+            box-shadow: 0 25px 50px rgba(168, 85, 247, 0.3);
+        }
+
+        .fade-in {
+            animation: fadeInAnimation 1s ease-in-out;
+        }
+
+        @keyframes fadeInAnimation {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Particle System */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        /* Magnetic Effect Container */
+        .magnetic {
+            will-change: transform;
+        }
+
+        /* Reveal Text Animation */
+        .reveal-text {
+            overflow: hidden;
+        }
+
+        .reveal-text-inner {
+            display: inline-block;
+        }
+
+        /* Parallax Layers */
+        .parallax-slow {
+            will-change: transform;
+        }
+
+        .parallax-medium {
+            will-change: transform;
+        }
+
+        .parallax-fast {
+            will-change: transform;
+        }
+
+        /* Loading Bar */
+        .loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            z-index: 10000;
+        }
+
+        /* Shine Effect */
+        .shine {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shine::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.7s ease;
+        }
+
+        .shine:hover::before {
+            left: 100%;
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(168, 85, 247, 0.5);
+            transform: scale(0);
+            animation: ripple-animation 0.6s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Smooth Scale Effect */
+        .scale-up {
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .scale-up:hover {
+            transform: scale(1.05);
+        }
+
+        .filter-white {
+            filter: brightness(0) invert(1);
+        }
+    
+        /* Enhanced About Me Card Animations */
+        .gradient-text {
+            background: linear-gradient(90deg, #9333ea, #3b82f6, #06b6d4);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 3s ease infinite;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% {
+                background-position: 0% center;
+            }
+            50% {
+                background-position: 100% center;
+            }
+        }
+
+        .morph-shape {
+            animation: morph 4s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        @keyframes morph {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+            }
+            25% {
+                transform: scale(1.1) rotate(5deg);
+            }
+            50% {
+                transform: scale(1) rotate(-5deg);
+            }
+            75% {
+                transform: scale(1.05) rotate(3deg);
+            }
+        }
+
+        .card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(147, 51, 234, 0.1), transparent);
+            animation: shine 4s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .card:hover::before {
+            animation: shine 2s infinite;
+        }
+
+        </style>
+</head>
+<body class="bg-black">
+    <div class="loading-bar"></div>
+    <div class="loader-overlay fixed inset-0 bg-black z-50 flex items-center justify-center">
+        <div class="text-purple-500 animate-pulse font-mono text-xl">INITIALIZING VIBES...</div>
+    </div>
+    <div id="gradient-blob-container" class="fixed inset-0 -z-10"></div>
+
+    <div id="main-container">
+        <div class="custom-cursor"></div>
+        <div class="cursor-follower"></div>
+        <div id="mouse-gradient" class="absolute w-96 h-96 rounded-full pointer-events-none" style="background: radial-gradient(circle, rgba(147, 51, 234, 0.3) 0%, transparent 70%); transition: all 0.3s ease-out;"></div>
+        
+        <!-- Navigation -->
+        <nav class="fixed top-0 w-full bg-black bg-opacity-20 backdrop-filter backdrop-blur-xl z-50 border-b border-white border-opacity-10">
+            <div class="max-w-7xl mx-auto px-6 py-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl floating"></div>
+                        <span class="font-bold text-xl">dev-in-the-bm</span>
+                    </div>
+                    <div class="hidden md:flex items-center gap-6">
+                        <a href="#home" class="nav-link text-gray-300 hover:text-white">Home</a>
+                        <a href="#about" class="nav-link text-gray-300 hover:text-white">About</a>
+                        <a href="#projects" class="nav-link text-gray-300 hover:text-white">Projects</a>
+                        <a href="#skills" class="nav-link text-gray-300 hover:text-white">Skills</a>
+                        <a href="#sponsor" class="nav-link text-gray-300 hover:text-white">Sponsor</a>
+                        <a href="#contact" class="nav-link text-gray-300 hover:text-white">Contact</a>
+                    </div>
+                    <button class="md:hidden text-gray-300 magnetic" onclick="toggleMobileMenu()">
+                        <i data-feather="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section relative h-screen flex items-center justify-center overflow-hidden">
+            <div class="absolute inset-0 z-0">
+                <div class="hero-banner parallax-slow w-full h-[120%] bg-cover bg-center" style="background-image: url(https://github.com/Dev-in-the-BM/Dev-in-the-BM/blob/main/banner.png?raw=true)"></div>
+                <div class="absolute inset-0 bg-black opacity-50"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+            </div>
+            <div class="relative z-10 text-center space-y-8 px-4">
+                <div>
+                    <h1 class="text-5xl md:text-7xl font-black tracking-tight">
+                        <div class="flex justify-center items-center gap-2 md:gap-4">
+                            <span class="hero-hi">Hi,</span>
+                            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Waving%20Hand.png" alt="Waving Hand" width="80" height="80" class="hero-waving-hand" />
+                            <span class="hero-im">I'm</span>
+                        </div>
+                        <div class="flex justify-center gap-1 md:gap-2 mt-4 flex-wrap">
+                            <span class="hero-title-char inline-block">D</span>
+                            <span class="hero-title-char inline-block">e</span>
+                            <span class="hero-title-char inline-block">v</span>
+                            <span class="hero-title-char inline-block">-</span>
+                            <span class="hero-title-char inline-block">i</span>
+                            <span class="hero-title-char inline-block">n</span>
+                            <span class="hero-title-char inline-block">-</span>
+                            <span class="hero-title-char inline-block">t</span>
+                            <span class="hero-title-char inline-block">h</span>
+                            <span class="hero-title-char inline-block">e</span>
+                            <span class="hero-title-char inline-block">-</span>
+                            <span class="hero-title-char inline-block">B</span>
+                            <span class="hero-title-char inline-block">M</span>
+                        </div>
+                    </h1>
+                </div>
+                <div class="hero-subtitle flex flex-col md:flex-row items-center justify-center gap-4 text-xl md:text-2xl mt-48">
+                    <div class="w-full max-w-2xl grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4">
+                        <span id="hero-bochur" class="flex items-center justify-center gap-2 bg-zinc-900/50 backdrop-blur-md px-6 py-3 rounded-full border border-purple-500/50 shine text-white">
+                            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Top%20Hat.png" alt="Top Hat" class="w-8 h-8" />
+                            Yeshiva Bochur
+                        </span>
+                        <span id="hero-separator" class="hidden md:inline text-purple-500/50" style="opacity: 0;">•</span>
+                        <span id="hero-coder" class="flex items-center justify-center gap-2 bg-zinc-900/50 backdrop-blur-md px-6 py-3 rounded-full border border-purple-500/50 shine text-white">
+                            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Activities/Sparkles.png" alt="Sparkles" class="w-8 h-8" />
+                            Vibe Coder
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <a href="#terminal-section" id="hero-arrow" class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-strong-bounce opacity-0">
+                <i data-feather="arrow-down" class="text-white w-8 h-8"></i>
+            </a>
+        </section>
+
+        <!-- Terminal Section -->
+        <section id="terminal-section" class="min-h-screen flex items-center justify-center px-6">
+            <div class="terminal max-w-3xl mx-auto w-full">
+                <div class="terminal-header">
+                    <div class="absolute left-1/2 transform -translate-x-1/2 text-white font-bold text-sm">Terminal</div>
+                    <div class="terminal-buttons">
+                        <button class="bar__button" aria-label="Minimize"><i data-feather="minus" class="w-3 h-3"></i></button>
+                        <button class="bar__button" aria-label="Maximize"><i data-feather="square" class="w-3 h-3"></i></button>
+                        <button class="bar__button bar__button--exit" aria-label="Close"><i data-feather="x" class="w-3 h-3"></i></button>
+                    </div>
+                </div>
+                <div class="py-6 text-left terminal-content">
+                    <div class="text-gray-300">
+                        <p id="line1">
+                            <span class="prompt-user">dev-in-the-bm</span><span class="prompt-at">@</span><span class="prompt-hostname">ubuntu</span>:
+                            <span class="prompt-directory">~</span><span class="prompt-dollar">$</span>
+                            <span id="line1-text"></span><span class="blinking-cursor"></span>
+                        </p>
+                        <p id="line2" style="display: none;"></p>
+                        <p id="line3" style="display: none;">
+                            <span class="prompt-user">dev-in-the-bm</span><span class="prompt-at">@</span><span class="prompt-hostname">ubuntu</span>:
+                            <span class="prompt-directory">~</span><span class="prompt-dollar">$</span>
+                            <span id="line3-text"></span><span class="blinking-cursor"></span>
+                        </p>
+                        <p id="line4" style="display: none;"></p>
+                        <p id="line5" style="display: none;">
+                            <span class="prompt-user">dev-in-the-bm</span><span class="prompt-at">@</span><span class="prompt-hostname">ubuntu</span>:
+                            <span class="prompt-directory">~</span><span class="prompt-dollar">$</span>
+                            <span id="line5-text"></span><span class="blinking-cursor"></span>
+                        </p>
+                        <p id="line6" style="display: none;"></p>
+                        <p id="line7" style="display: none;">
+                            <span class="prompt-user">dev-in-the-bm</span><span class="prompt-at">@</span><span class="prompt-hostname">ubuntu</span>:
+                            <span class="prompt-directory">~</span><span class="prompt-dollar">$</span>
+                            <span id="line7-text"></span><span class="blinking-cursor"></span>
+                        </p>
+                        <p id="line8" style="display: none;"></p>
+                        <p id="line9" style="display: none;">
+                            <span class="prompt-user">dev-in-the-bm</span><span class="prompt-at">@</span><span class="prompt-hostname">ubuntu</span>:
+                            <span class="prompt-directory">~</span><span class="prompt-dollar">$</span>
+                            <span id="line9-text"></span><span class="blinking-cursor"></span>
+                        </p>
+                        <p id="line10" style="display: none;"></p>
+                        <p id="line11" style="display: none;">
+                            <span class="prompt-user">dev-in-the-bm</span><span class="prompt-at">@</span><span class="prompt-hostname">ubuntu</span>:
+                            <span class="prompt-directory">~</span><span class="prompt-dollar">$</span>
+                            <span id="line11-text"></span><span class="blinking-cursor"></span>
+                        </p>
+                        <p id="line12" style="display: none;"></p>
+                        <p id="line13" style="display: none;">
+                            <span class="prompt-user">dev-in-the-bm</span><span class="prompt-at">@</span><span class="prompt-hostname">ubuntu</span>:
+                            <span class="prompt-directory">~</span><span class="prompt-dollar">$</span>
+                            <span id="line13-text"></span><span class="blinking-cursor"></span>
+                        </p>
+                        <p id="line14" style="display: none;"></p>
+                        <p id="line15" style="display: none;">
+                            <span class="prompt-user">dev-in-the-bm</span><span class="prompt-at">@</span><span class="prompt-hostname">ubuntu</span>:
+                            <span class="prompt-directory">~</span><span class="prompt-dollar">$</span>
+                            <span id="line15-text"></span><span class="blinking-cursor"></span>
+                        </p>
+                        <p id="line16" style="display: none;"></p>
+                        <p id="line17" style="display: none;">
+                            <span class="prompt-user">dev-in-the-bm</span><span class="prompt-at">@</span><span class="prompt-hostname">ubuntu</span>:
+                            <span class="prompt-directory">~</span><span class="prompt-dollar">$</span>
+                            <span id="line17-text"></span><span class="blinking-cursor"></span>
+                        </p>
+                        <p id="line18" class="" style="display: none;"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-20 px-6 animate-on-scroll">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-5xl font-black text-center mb-12 reveal-text">
+                    <span class="reveal-text-inner">
+                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Symbols/Information.png" alt="Information" width="50" height="50" class="inline-emoji" /> About Me
+                    </span>
+                </h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Card 1: Yeshiva Bochur -->
+                    <div class="card ripple hover:scale-105 transition-transform duration-300">
+                        <div class="flex items-start gap-4">
+                            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Top%20Hat.png" alt="Top Hat" width="40" height="40" class="inline-emoji morph-shape" />
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold mb-3 gradient-text">Yeshiva bochur</h3>
+                                <p class="text-gray-300 text-lg">Currently learning בתולה נשאת</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: JTech Forums -->
+                    <div class="card ripple hover:scale-105 transition-transform duration-300">
+                        <div class="flex items-start gap-4">
+                            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Left%20Speech%20Bubble.png" alt="Speech Bubble" width="40" height="40" class="inline-emoji morph-shape" />
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold mb-3 gradient-text">JTech Forums</h3>
+                                <p class="text-gray-300 text-lg">Discussing filtering, Linux, app modding, and pretty much anything tech related</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: App Modder -->
+                    <div class="card ripple hover:scale-105 transition-transform duration-300">
+                        <div class="flex items-start gap-4">
+                            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Hammer%20and%20Wrench.png" alt="Hammer and Wrench" width="40" height="40" class="inline-emoji morph-shape" />
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold mb-3 gradient-text">App modder</h3>
+                                <p class="text-gray-300 text-lg">Creating kosher mods for filtered devices</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Linux Enthusiast -->
+                    <div class="card ripple hover:scale-105 transition-transform duration-300">
+                        <div class="flex items-start gap-4">
+                            <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Animals/Penguin.png" alt="Penguin" width="40" height="40" class="inline-emoji morph-shape" />
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold mb-3 gradient-text">Linux Enthusiast</h3>
+                                <p class="text-gray-300 text-lg">Somehow my Linux environment still works. Not sure why.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="py-20 px-6 animate-on-scroll">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-5xl font-black text-center mb-12 reveal-text">
+                    <span class="reveal-text-inner">
+                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" alt="Glowing Star" width="50" height="50" class="inline-emoji" /> Featured Projects
+                    </span>
+                </h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- JDate Project -->
+                    <div class="project-card">
+                        <div class="p-8 relative z-10">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-2xl font-bold gradient-text">JDate</h3>
+                                <i data-feather="calendar" class="w-8 h-8 text-purple-400"></i>
+                            </div>
+                            <p class="text-gray-300 mb-6 text-lg">
+                                A GNOME extension adding the Jewish date to the top bar. Perfect for keeping track of Hebrew calendar dates while working on your Linux desktop.
+                            </p>
+                            <div class="flex gap-3 mb-6 flex-wrap">
+                                <span class="skill-badge">JavaScript</span>
+                                <span class="skill-badge">GNOME</span>
+                                <span class="skill-badge">Hebrew Calendar</span>
+                            </div>
+                            <div class="flex gap-6">
+                                <a href="https://github.com/Dev-in-the-BM/JDate-devinthebm.com" class="btn-primary ripple" target="_blank" rel="noopener noreferrer">
+                                    <i data-feather="github" class="w-5 h-5"></i>
+                                    View on GitHub
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Crescent Remixer -->
+                    <div class="project-card">
+                        <div class="p-8 relative z-10">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-2xl font-bold gradient-text">Crescent Remixer</h3>
+                                <i data-feather="image" class="w-8 h-8 text-blue-400"></i>
+                            </div>
+                            <p class="text-gray-300 mb-6 text-lg">
+                                Nano Banana powered image remixer. Transform ordinary images into creative artworks with the power of AI and creative algorithms.
+                            </p>
+                            <div class="flex gap-3 mb-6 flex-wrap">
+                                <span class="skill-badge">Python</span>
+                                <span class="skill-badge">Image Processing</span>
+                                <span class="skill-badge">AI</span>
+                            </div>
+                            <div class="flex gap-6">
+                                <a href="https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221V3wjVOF1bdK4wLFwndbPXhgIgwazxbpL%22%5D,%22action%22:%22open%22,%22userId%22:%22113814095754292775986%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing" class="btn-primary ripple" target="_blank" rel="noopener noreferrer">
+                                    <img src="https://raw.githubusercontent.com/Dev-in-the-BM/Dev-in-the-BM.github.io/432059fd66f963b8fc580fdb3ac1fa02f8127751/Assets/Google%20AI%20Logo/aistudio_white.svg" class="w-6 h-6 mr-1 filter-white">
+                                    Use in Google AI Studio
+                                </a>
+                                <a href="https://github.com/Dev-in-the-BM/Crescent-Remixer" class="btn-secondary ripple" target="_blank" rel="noopener noreferrer">
+                                    <i data-feather="github" class="w-5 h-5"></i>
+                                    View on GitHub
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sponsor Section -->
+        <section id="sponsor" class="py-20 px-6 animate-on-scroll">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-5xl font-black text-center mb-12 reveal-text">
+                    <span class="reveal-text-inner">
+                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Toolbox.png" alt="Toolbox" width="50" height="50" class="inline-emoji" /> Sponsor my projects
+                    </span>
+                </h2>
+                <div class="grid md:grid-cols-3 gap-6 mb-12">
+                    <div class="card text-center sponsor-card">
+                        <img src="https://github.com/Dev-in-the-BM/Dev-in-the-BM/blob/main/Assets/Tux.PNG?raw=true" alt="Tux Linux Mascot" class="w-20 h-20 mx-auto mb-4" />
+                        <h3 class="text-xl font-bold mb-2">FOSS Projects</h3>
+                        <p class="text-gray-400 text-sm">Contributing to and creating open-source software for the community.</p>
+                    </div>
+                    <div class="card text-center sponsor-card">
+                        <img src="https://raw.githubusercontent.com/Dev-in-the-BM/Dev-in-the-BM/5faee36148d23546f43bd27b61012bec21164caa/android-head_flat.svg" alt="Android Head" class="w-20 h-20 mx-auto mb-4" />
+                        <h3 class="text-xl font-bold mb-2">Android App Mods</h3>
+                        <p class="text-gray-400 text-sm">Modifying Android apps for kashrus and better usability on filtered devices.</p>
+                    </div>
+                    <div class="card text-center sponsor-card">
+                        <img src="https://github.com/Dev-in-the-BM/Dev-in-the-BM/blob/main/Jtech%20Logo.png?raw=true" alt="JTech Logo" class="w-20 h-20 mx-auto mb-4" />
+                        <h3 class="text-xl font-bold mb-2">JTech Forums</h3>
+                        <p class="text-gray-400 text-sm">Active participation and contributions to discussions about kosher tech, filtering, Linux, and more.</p>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <p class="text-xl text-gray-300 mb-8">Your sponsorship helps me dedicate more time to these projects.</p>
+                    <a href="https://buymeacoffee.com/devinthebm" class="btn-primary glow text-lg ripple">
+                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Food/Chocolate%20Bar.png" alt="Chocolate Bar" width="25" height="25" class="inline-emoji" />
+                        Buy me some chocolate
+                    </a>
+                    <p class="mt-6 text-gray-400">
+                        Thank you for your support! <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Folded%20Hands.png" alt="Folded Hands" width="30" height="30" class="inline-emoji" />
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="py-20 px-6 animate-on-scroll">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-5xl font-black text-center mb-12 reveal-text">
+                    <span class="reveal-text-inner">
+                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Brain.png" alt="Brain" width="50" height="50" class="inline-emoji" /> Skills & Tools
+                    </span>
+                </h2>
+                
+                <div class="mb-12">
+                    <h3 class="text-3xl font-bold mb-6 flex items-center gap-3">
+                        <span></span> Languages
+                    </h3>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="skill-badge shine">
+                            <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-12">
+                    <h3 class="text-3xl font-bold mb-6 flex items-center gap-3">
+                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Toolbox.png" alt="Toolbox" width="25" height="25" class="inline-emoji" /> Environments & Tools
+                    </h3>
+                    <div class="flex flex-wrap gap-4 tools-container">
+                        <span class="tool-badge shine"><img src="https://img.shields.io/static/v1?label=🧠&message=Yiddeshe%20Kup&labelColor=000000&color=333333&style=for-the-badge" alt="Yiddeshe Kup" /></span>
+                        <span class="tool-badge shine"><img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux" /></span>
+                        <span class="tool-badge shine"><img src="https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=Ubuntu&logoColor=white" alt="Ubuntu" /></span>
+                        <span class="tool-badge shine"><img src="https://img.shields.io/badge/GNOME-4A86CF?style=for-the-badge&logo=gnome&logoColor=white" alt="GNOME" /></span>
+                        <span class="tool-badge shine"><img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white" alt="Git" /></span>
+                        <span class="tool-badge shine"><img src="https://img.shields.io/badge/VS_Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white" alt="VS Code" /></span>
+                        <span class="tool-badge shine"><img src="https://img.shields.io/badge/Zen%20Browser-black?style=for-the-badge&logo=zenbrowser&logoColor=white" alt="Zen Browser" /></span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-20 px-6 animate-on-scroll">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-5xl font-black mb-8 reveal-text">
+                    <span class="reveal-text-inner">
+                        <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Left%20Speech%20Bubble.png" alt="Left Speech Bubble" width="50" height="50" class="inline-emoji" /> Get In Touch
+                    </span>
+                </h2>
+                <p class="text-xl text-gray-400 mb-12">
+                    I'm always interested in hearing about new projects, collaborations, and opportunities.
+                </p>
+                <div class="flex justify-center gap-6 mb-12 flex-wrap">
+                    <a href="mailto:devinthebm@outlook.com" class="btn-primary glow ripple">
+                        <i data-feather="mail" class="w-5 h-5"></i>
+                        Email Me
+                    </a>
+                    <a href="https://github.com/Dev-in-the-BM" class="btn-secondary ripple">
+                        <i data-feather="github" class="w-5 h-5"></i>
+                        GitHub
+                    </a>
+                </div>
+                <div class="flex justify-center gap-8">
+                    <a href="https://github.com/Dev-in-the-BM" class="text-gray-400 hover:text-white transition-all hover:scale-125">
+                        <i data-feather="github" class="w-8 h-8"></i>
+                    </a>
+                    <a href="https://forums.jtechforums.org/invites/8jD5U8NMxr" class="text-gray-400 hover:text-white transition-all hover:scale-125">
+                        <i data-feather="message-circle" class="w-8 h-8"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-12 px-6 border-t border-gray-800">
+            <div class="max-w-7xl mx-auto text-center">
+                <p class="text-gray-500 text-lg">
+                    © 2025 Dev-in-the-BM. Built with <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Brain.png" alt="Brain" width="25" height="25" class="inline-emoji" /> Yiddeshe Kup and lots of <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Food/Hot%20Beverage.png" alt="Hot Beverage" width="25" height="25" class="inline-emoji" />
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Feather Icons
+        feather.replace();
+
+        // Custom Cursor & Mouse Gradient
+        const cursor = document.querySelector('.custom-cursor');
+        const follower = document.querySelector('.cursor-follower');
+        const terminal = document.querySelector('.terminal');
+        const mouseGradient = document.getElementById('mouse-gradient');
+        let mouseX = 0, mouseY = 0;
+        let followerX = 0, followerY = 0;
+
+        // Cursor trail effect
+        const trailCount = 10;
+        const trails = [];
+        for (let i = 0; i < trailCount; i++) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            document.body.appendChild(trail);
+            trails.push(trail);
+        }
+
+        let trailIndex = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            cursor.style.left = mouseX - 10 + 'px';
+            cursor.style.top = mouseY - 10 + 'px';
+
+            // Create trail
+            const trail = trails[trailIndex];
+            trail.style.left = mouseX - 4 + 'px';
+            trail.style.top = mouseY - 4 + 'px';
+            gsap.fromTo(trail, 
+                { scale: 1, opacity: 0.6 },
+                { scale: 0, opacity: 0, duration: 0.5 }
+            );
+            trailIndex = (trailIndex + 1) % trailCount;
+
+            if (mouseGradient) {
+                mouseGradient.style.left = mouseX - 192 + 'px';
+                mouseGradient.style.top = mouseY - 192 + 'px';
+            }
+        });
+
+        // Smooth follower animation
+        gsap.ticker.add(() => {
+            followerX += (mouseX - followerX) * 0.1;
+            followerY += (mouseY - followerY) * 0.1;
+            follower.style.left = followerX - 20 + 'px';
+            follower.style.top = followerY - 20 + 'px';
+        });
+
+        document.addEventListener('mousedown', () => {
+            gsap.to([cursor, follower], { scale: 0.8, duration: 0.2 });
+        });
+
+        document.addEventListener('mouseup', () => {
+            gsap.to([cursor, follower], { scale: 1, duration: 0.2 });
+        });
+
+        terminal.addEventListener('mouseenter', () => {
+            document.body.classList.add('terminal-hover');
+        });
+
+        terminal.addEventListener('mouseleave', () => {
+            document.body.classList.remove('terminal-hover');
+        });
+
+        // Ripple effect on cards
+        const rippleElements = document.querySelectorAll('.ripple');
+        rippleElements.forEach(el => {
+            el.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple-effect');
+                this.appendChild(ripple);
+
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+
+                setTimeout(() => ripple.remove(), 600);
+            });
+        });
+
+        // Project card mouse tracking
+        const projectCards = document.querySelectorAll('.project-card');
+        projectCards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                card.style.setProperty('--mouse-x', x + '%');
+                card.style.setProperty('--mouse-y', y + '%');
+            });
+        });
+
+        // Particle system
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            
+            const size = gsap.utils.random(3, 8);
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.background = `hsl(${gsap.utils.random(250, 290)}, 100%, 60%)`;
+            
+            document.body.appendChild(particle);
+
+            gsap.to(particle, {
+                x: gsap.utils.random(-100, 100),
+                y: gsap.utils.random(-100, 100),
+                opacity: 0,
+                duration: gsap.utils.random(1, 2),
+                ease: 'power2.out',
+                onComplete: () => particle.remove()
+            });
+        }
+
+        // Create particles on hover over special elements
+        document.querySelectorAll('.btn-primary, .project-card').forEach(el => {
+            el.addEventListener('mouseenter', (e) => {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        createParticle(e.clientX, e.clientY);
+                    }, i * 50);
+                }
+            });
+        });
+
+        // GSAP Animations
+        document.addEventListener('DOMContentLoaded', () => {
+            gsap.registerPlugin(ScrollTrigger, TextPlugin, ScrollToPlugin);
+
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const target = document.querySelector(targetId);
+
+                    if (targetId === '#terminal-section') {
+                        // Special handling for terminal due to pinning
+                        const terminalTrigger = ScrollTrigger.getById("terminalPin");
+                        gsap.to(window, {
+                            scrollTo: { y: terminalTrigger.start + 100, autoKill: false },
+                            duration: 1.5,
+                            ease: 'power3.inOut'
+                        });
+                    } else if (target) {
+                        gsap.to(window, {
+                            scrollTo: { y: target, offsetY: 80 },
+                            duration: 1,
+                            ease: 'power3.inOut'
+                        });
+                    }
+                });
+            });
+
+            const loadingBar = document.querySelector('.loading-bar');
+
+            // Main timeline
+            const tl = gsap.timeline();
+            tl.to(loadingBar, {
+                width: '100%',
+                duration: 1,
+                ease: 'power2.inOut'
+            })
+            .to('.loader-overlay', {
+                yPercent: -100,
+                duration: 1.2,
+                ease: 'expo.inOut',
+            })
+            .to(loadingBar, { opacity: 0, duration: 0.5 }, "-=0.3")
+            .from('.hero-hi', {
+                y: -100,
+                opacity: 0,
+                duration: 1,
+                ease: 'power3.out'
+            }, '-=0.5')
+            .from('.hero-waving-hand', {
+                rotate: -180,
+                scale: 0,
+                opacity: 0,
+                duration: 1.2,
+                ease: 'elastic.out(1, 0.5)'
+            }, '-=0.6')
+            .from('.hero-im', {
+                x: 100,
+                opacity: 0,
+                duration: 1,
+                ease: 'power3.out'
+            }, '-=0.8')
+            .from('.hero-title-char', {
+                y: 100,
+                opacity: 0,
+                stagger: {
+                    each: 0.05,
+                    from: 'random'
+                },
+                duration: 1,
+                ease: 'back.out(1.7)',
+            }, '-=0.6');
+
+            // Subtitle animations with spring-like bounce
+            tl.from('#hero-bochur', {
+                x: -400,
+                opacity: 0,
+                duration: 1.2,
+                ease: 'elastic.out(1, 0.5)'
+            }, "+=0.3")
+            .addLabel("coderStart", "-=0.9") // Add a label for synchronization
+            .from('#hero-coder', {
+                x: 400,
+                opacity: 0,
+                duration: 1.2,
+                ease: 'elastic.out(1, 0.5)'
+            }, "coderStart") // Start coder animation at the label
+            .to('#hero-separator', {
+                opacity: 1,
+                duration: 0.8
+            }, "coderStart") // Start separator fade-in at the same label
+            .to('#hero-arrow', {
+                opacity: 1,
+                duration: 0.8,
+                ease: 'power2.out',
+            }, "coderStart"); // Start at the 'coderStart' label
+
+            // Parallax effect on hero banner
+            gsap.to('.hero-banner', {
+                yPercent: 30,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: '.hero-section',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: 1
+                }
+            });
+
+            // Enhanced gradient blob animations
+            const blobContainer = document.getElementById('gradient-blob-container');
+            gsap.set(blobContainer, { opacity: 0 });
+            const blobCount = 15;
+            const colors = [
+                'radial-gradient(circle, rgba(168, 85, 247, 0.5), transparent 70%)',
+                'radial-gradient(circle, rgba(236, 72, 153, 0.5), transparent 70%)',
+                'radial-gradient(circle, rgba(59, 130, 246, 0.5), transparent 70%)',
+                'radial-gradient(circle, rgba(6, 182, 212, 0.5), transparent 70%)',
+                'radial-gradient(circle, rgba(234, 179, 8, 0.4), transparent 70%)',
+                'radial-gradient(circle, rgba(249, 115, 22, 0.4), transparent 70%)'
+            ];
+
+            for (let i = 0; i < blobCount; i++) {
+                const blob = document.createElement('div');
+                blob.style.position = 'absolute';
+                
+                const size = gsap.utils.random(window.innerWidth * 0.15, window.innerWidth * 0.35);
+                blob.style.width = `${size}px`;
+                blob.style.height = `${size}px`;
+                
+                blob.style.background = gsap.utils.random(colors);
+                blob.style.borderRadius = '50%';
+                blob.style.filter = `blur(${gsap.utils.random(100, 150)}px)`;
+                blob.style.opacity = gsap.utils.random(0.6, 1);
+                blobContainer.appendChild(blob);
+
+                gsap.set(blob, {
+                    x: gsap.utils.random(-size / 2, window.innerWidth - size / 2),
+                    y: gsap.utils.random(-size / 2, window.innerHeight - size / 2),
+                });
+
+                function animateBlob() {
+                    const newSize = gsap.utils.random(window.innerWidth * 0.15, window.innerWidth * 0.35);
+                    gsap.to(blob, {
+                        x: gsap.utils.random(-newSize / 2, window.innerWidth - newSize / 2),
+                        y: gsap.utils.random(-newSize / 2, window.innerHeight - newSize / 2),
+                        width: `${newSize}px`,
+                        height: `${newSize}px`,
+                        opacity: gsap.utils.random(0.5, 1),
+                        borderRadius: () => `${gsap.utils.random(40, 60)}% ${gsap.utils.random(40, 60)}% ${gsap.utils.random(40, 60)}% ${gsap.utils.random(40, 60)}% / ${gsap.utils.random(40, 60)}% ${gsap.utils.random(40, 60)}% ${gsap.utils.random(40, 60)}% ${gsap.utils.random(40, 60)}%`,
+                        duration: gsap.utils.random(20, 30),
+                        ease: 'none',
+                        onComplete: animateBlob
+                    });
+                }
+                animateBlob();
+            }
+
+            function scrollTerminal() {
+                const el = document.querySelector('.terminal-content');
+                if (el) {
+                    el.scrollTop = el.scrollHeight;
+                }
+            }
+
+            const sectionsToAnimate = document.querySelectorAll('.animate-on-scroll');
+            gsap.set(sectionsToAnimate, { opacity: 0 });
+
+            // Enhanced terminal timeline
+            const terminalTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: "#terminal-section",
+                    id: "terminalPin", // Add an ID for easy reference
+                    start: "top top",
+                    end: "+=8000",
+                    scrub: 1,
+                    pin: true,
+                    onEnter: () => {
+                        gsap.to('#gradient-blob-container', { opacity: 0, duration: 1 });
+                        gsap.to('.terminal', { scale: 1.02, duration: 0.5, ease: 'power2.out' });
+                    },
+                    onLeave: () => {
+                        gsap.to('#gradient-blob-container', { opacity: 1, duration: 2 });
+                        gsap.to('.terminal', { scale: 1, duration: 0.5 });
+                    },
+                    onEnterBack: () => {
+                        gsap.to('#gradient-blob-container', { opacity: 0, duration: 1 });
+                        gsap.to('.terminal', { scale: 1.02, duration: 0.5 });
+                    },
+                    onLeaveBack: () => {
+                        gsap.to('#gradient-blob-container', { opacity: 0, duration: 1 });
+                        gsap.to('.terminal', { scale: 1, duration: 0.5 });
+                    },
+                }
+            });
+
+            terminalTl.to("#hero", { opacity: 0, duration: 2 })
+              .from(".terminal", { opacity: 0, scale: 0.95, duration: 0.1 }, "-=1.9")
+              .to("#line1-text", { text: "whoami", duration: 1.2, delay: 1, onComplete: scrollTerminal })
+              .set("#line1 .blinking-cursor", { display: "none" })
+              .set("#line2", { display: "block", text: "dev-in-the-bm", onComplete: scrollTerminal })
+              .set("#line3", { display: "block", onComplete: scrollTerminal })
+              .to("#line3-text", { text: "cat ~/status.txt", duration: 3.2, delay: 2, onComplete: scrollTerminal })
+              .set("#line3 .blinking-cursor", { display: "none" })
+              .set("#line4", { display: "block", text: "Actively contributing to JTech Forums and modding apps for flip phones.", onComplete: scrollTerminal })
+              .set("#line5", { display: "block", onComplete: scrollTerminal })
+              .to("#line5-text", { text: "ls -l ~/projects", duration: 3.4, delay: 2, onComplete: scrollTerminal })
+              .set("#line5 .blinking-cursor", { display: "none" })
+              .set("#line6", {
+                  display: "block",
+                  innerHTML: `<pre>\n-rw-r--r-- 1 dev-in-the-bm root 1.2K Oct 21 10:00 JDate-GNOME-Extension\n-rw-r--r-- 1 dev-in-the-bm root 3.4M Oct 20 14:30 Crescent-Remixer\n</pre>`,
+                  onComplete: scrollTerminal
+              })
+              .set("#line7", { display: "block", onComplete: scrollTerminal })
+              .to("#line7-text", { text: "hostnamectl", duration: 2, delay: 2, onComplete: scrollTerminal })
+              .set("#line7 .blinking-cursor", { display: "none" })
+              .set("#line8", {
+                  display: "block",
+                  innerHTML: `<pre>   Static hostname: yeshiva-node\n         Icon name: computer-laptop\n           Chassis: portable\n        Machine ID: 770613b21\n           Location: ~/beis-medrash\n             Locale: en_US.UTF-8\n             Region: new-york/monsey</pre>`,
+                  onComplete: scrollTerminal
+              })
+              .set("#line9", { display: "block", onComplete: scrollTerminal })
+              .to("#line9-text", { text: "ps aux | grep tools", duration: 3, delay: 2, onComplete: scrollTerminal })
+              .set("#line9 .blinking-cursor", { display: "none" })
+              .set("#line10", {
+                  display: "block",
+                  innerHTML: `<pre>USER       PID  %CPU %MEM   VSZ   RSS TTY      STAT START   TIME COMMAND\nnaftali   2174   3.8  1.2  412000 21000 ?       Sl   Oct20   11:25 /usr/bin/wave-terminal --session=dev\nnaftali   3041  11.0  4.5 1012000 92000 ?       Sl   Oct20   14:47 /usr/bin/Code --unity-launch\nnaftali   3678   2.5  0.9  580000 16000 ?       Sl   Oct20    8:02 /usr/bin/zen-browser --profile=naftali</pre>`,
+                  onComplete: scrollTerminal
+              })
+              .set("#line11", { display: "block", onComplete: scrollTerminal })
+              .to("#line11-text", { text: "id -nG", duration: 1.5, delay: 2, onComplete: scrollTerminal })
+              .set("#line11 .blinking-cursor", { display: "none" })
+              .set("#line12", { display: "block", text: "dev-in-the-bm shmuztech jtech", onComplete: scrollTerminal })
+              .set("#line13", { display: "block", onComplete: scrollTerminal })
+              .to("#line13-text", { text: "man life", duration: 1.5, delay: 2, onComplete: scrollTerminal })
+              .set("#line13 .blinking-cursor", { display: "none" })
+              .set("#line14", {
+                  display: "block",
+                  innerHTML: `<pre>No manual entry for life\n\nTry these related manuals:\n  man gadgets\n  man tech\n  man linux\n\nTo create a manual page: <code>mkdir -p ~/man/man1 && echo ".TH life 1". > ~/man/man1/life.1 && man -M ~/man life</code></pre>`,
+                  onComplete: scrollTerminal
+              })
+              .set("#line15", { display: "block", onComplete: scrollTerminal })
+              .to("#line15-text", { text: "sudo apt install sleep", duration: 3, delay: 2, onComplete: scrollTerminal })
+              .set("#line15 .blinking-cursor", { display: "none" })
+              .set("#line16", { display: "block", text: "Error: Unable to locate package sleep", onComplete: scrollTerminal })
+              .set("#line17", { display: "block", onComplete: scrollTerminal })
+              .to("#line17-text", { text: "sudo get-chocolate", duration: 3, delay: 2, onComplete: scrollTerminal })
+              .set("#line17 .blinking-cursor", { display: "none" })
+              .set("#line18", { display: "block", text: "Permission denied: chocolate supply depleted. Try: sudo buy-chocolate", onComplete: scrollTerminal })
+              .set({}, {}, "+=6")
+              .to(".terminal", {
+                  opacity: 0,
+                  scale: 0.95,
+                  duration: 2,
+                  onComplete: () => {
+                    // Animate sections after terminal - STAGGERED REVEALS
+                    sectionsToAnimate.forEach((section, index) => {
+                        gsap.fromTo(section,
+                            { opacity: 0, y: 80 },
+                            {
+                                opacity: 1,
+                                y: 0,
+                                duration: 1.2,
+                                ease: 'power3.out',
+                                scrollTrigger: {
+                                    trigger: section,
+                                    start: 'top 80%',
+                                    end: 'bottom 20%',
+                                    toggleActions: 'play none none reverse'
+                                }
+                            }
+                        );
+
+                        // Animate children elements with stagger
+                        const items = section.querySelectorAll('.about-item, .focus-item, .sponsor-card, .stat-card, .tool-badge');
+                        if (items.length > 0) {
+                            gsap.fromTo(items,
+                                { 
+                                    opacity: 0, 
+                                    y: 40,
+                                    scale: 0.95
+                                },
+                                {
+                                    opacity: 1,
+                                    y: 0,
+                                    scale: 1,
+                                    duration: 0.8,
+                                    stagger: {
+                                        each: 0.1,
+                                        from: 'start'
+                                    },
+                                    ease: 'back.out(1.4)',
+                                    scrollTrigger: {
+                                        trigger: section,
+                                        start: 'top 70%',
+                                        toggleActions: 'play none none reverse'
+                                    }
+                                }
+                            );
+                        }
+                    });
+
+                    // Animate reveal text headers
+                    document.querySelectorAll('.reveal-text-inner').forEach(el => {
+                        gsap.fromTo(el,
+                            { 
+                                y: 60,
+                                opacity: 0
+                            },
+                            {
+                                y: 0,
+                                opacity: 1,
+                                duration: 1,
+                                ease: 'power3.out',
+                                scrollTrigger: {
+                                    trigger: el,
+                                    start: 'top 85%',
+                                    toggleActions: 'play none none reverse'
+                                }
+                            }
+                        );
+                    });
+
+                    // Parallax effects on different elements
+                    gsap.utils.toArray('.parallax-slow').forEach(el => {
+                        gsap.to(el, {
+                            y: 50,
+                            scrollTrigger: {
+                                trigger: el,
+                                start: 'top bottom',
+                                end: 'bottom top',
+                                scrub: 1.5
+                            }
+                        });
+                    });
+
+                    gsap.utils.toArray('.parallax-medium').forEach(el => {
+                        gsap.to(el, {
+                            y: 100,
+                            scrollTrigger: {
+                                trigger: el,
+                                start: 'top bottom',
+                                end: 'bottom top',
+                                scrub: 1
+                            }
+                        });
+                    });
+
+                    gsap.utils.toArray('.parallax-fast').forEach(el => {
+                        gsap.to(el, {
+                            y: 150,
+                            scrollTrigger: {
+                                trigger: el,
+                                start: 'top bottom',
+                                end: 'bottom top',
+                                scrub: 0.5
+                            }
+                        });
+                    });
+                  }
+              });
+        });
+    </script>
+</body>
+</html>

@@ -3,163 +3,219 @@
 <head>
   <base target="_top">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
     :root {
-      --primary-color: #007bff;
-      --secondary-color: #6c757d;
-      --success-color: #28a745;
-      --danger-color: #dc3545;
-      --light-color: #f8f9fa;
-      --dark-color: #343a40;
-      --font-color: #333;
+      --primary-color: #1766fa;
+      --secondary-color: #3b82f6;
+      --dark-color: #000000;
+      --font-color: #ffffff;
+      --border-color: rgba(255, 255, 255, 0.1);
     }
 
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      background-color: var(--dark-color);
       color: var(--font-color);
       padding: 2rem;
+      overflow-x: hidden;
+    }
+    
+    .text-body-secondary, .text-secondary {
+      color: rgba(255, 255, 255, 0.85) !important;
+    }
+
+    .form-label, .form-check-label, .modal-title {
+      color: var(--font-color);
+    }
+
+    .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-secondary {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.15);
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.4s ease;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 12px 25px rgba(80, 80, 80, 0.2);
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+    
+    #gradient-blob-container {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        overflow: hidden;
     }
 
     .container {
       max-width: 900px;
       margin: auto;
-      animation: fadeIn 0.8s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
+      position: relative;
+      z-index: 1;
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 15px;
-      margin-bottom: 2rem;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: rgba(35, 35, 45, 0.75);
+      backdrop-filter: blur(20px) saturate(150%);
+      -webkit-backdrop-filter: blur(20px) saturate(150%);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      margin-bottom: 3rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+      overflow: hidden;
     }
 
     .card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
+      border-color: var(--primary-color);
+      transform: translateY(-10px) scale(1.04);
+      box-shadow: 0 25px 50px rgba(23, 102, 250, 0.3);
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -150%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(23, 102, 250, 0.2), transparent);
+        transition: left 0.8s ease;
+    }
+
+    .card:hover::before {
+        left: 150%;
     }
 
     .card-header {
-      background-color: rgba(0, 123, 255, 0.8);
-      color: white;
-      border-bottom: none;
-      border-top-left-radius: 15px;
-      border-top-right-radius: 15px;
+      background: transparent;
+      color: var(--font-color);
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-color);
+      padding: 1.5rem;
     }
     
     .form-control, .form-select {
-      background-color: rgba(255, 255, 255, 0.7);
-      color: var(--dark-color);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
+      background-color: rgba(0, 0, 0, 0.3);
+      color: var(--font-color);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
     }
 
     .form-control:focus, .form-select:focus {
-      background-color: rgba(255, 255, 255, 0.9);
-      color: var(--dark-color);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: var(--font-color);
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
-    }
-
-    .btn {
-        border-radius: 8px;
-        transition: all 0.3s ease;
+      box-shadow: 0 0 0 0.25rem rgba(23, 102, 250, 0.3);
     }
 
     .btn-primary {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.4s ease;
     }
 
     .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 12px 25px rgba(23, 102, 250, 0.4);
     }
 
     .group-item {
-      background: rgba(255, 255, 255, 0.7);
-      border-radius: 10px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.3s ease;
-      animation: slideIn 0.5s forwards;
-      opacity: 0;
-    }
-
-    @keyframes slideIn {
-        from { transform: translateX(-20px); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 1.5rem 2rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.4s ease;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
     }
     
     .group-item:hover {
-        background-color: rgba(255, 255, 255, 1);
-        transform: scale(1.02);
+        background-color: rgba(255, 255, 255, 0.12);
+        transform: scale(1.03);
+        border-color: var(--primary-color);
     }
 
     .modal-content {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 15px;
-    }
-    
-    #toast {
-      position: fixed;
-      bottom: -100px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 1rem 2rem;
-      border-radius: 8px;
-      color: white;
-      font-weight: 600;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-      z-index: 1060;
-    }
-    #toast.show {
-      bottom: 30px;
+      background: rgba(15, 15, 15, 0.8);
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      color: var(--font-color);
     }
 
     .loader {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(255,255,255,0.7);
+        background: var(--dark-color);
         display: flex; align-items: center; justify-content: center; z-index: 9999;
-        transition: opacity 0.3s;
+    }
+
+    .group-item .btn {
+        border: none;
+        border-radius: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .group-item .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .group-item .edit-btn.btn-outline-light {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: #fff;
+    }
+
+    .group-item .edit-btn.btn-outline-light:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .group-item .delete-btn.btn-outline-danger {
+        background-color: rgba(220, 53, 69, 0.2);
+        color: #ff9aa2;
+    }
+
+    .group-item .delete-btn.btn-outline-danger:hover {
+        background-color: rgba(220, 53, 69, 0.4);
+        color: #fff;
     }
 
   </style>
 </head>
 <body>
+  <div id="gradient-blob-container"></div>
   <div id="loader" class="loader">
-      <div class="spinner-border text-primary" role="status">
+      <div class="spinner-border" style="width: 3rem; height: 3rem; color: var(--primary-color);" role="status">
           <span class="visually-hidden">Loading...</span>
       </div>
   </div>
 
   <div class="container">
-    <div class="text-center my-4">
-      <h1 class="display-4">🤖 GroupMe Bot Settings</h1>
+    <div class="text-center my-5">
+      <h1 class="display-3 fw-bold text-light">🤖 GroupMe Bot Settings</h1>
     </div>
 
     <div class="card">
       <div class="card-header">
         <h2>Global Settings</h2>
       </div>
-      <div class="card-body">
-        <div id="global-settings-form" class="row g-3">
+      <div class="card-body p-4">
+        <div id="global-settings-form" class="row g-4">
           <div class="col-md-4">
             <label for="USER_PREFIX" class="form-label">Fallback User Prefix</label>
             <input type="text" class="form-control" id="USER_PREFIX">
@@ -173,7 +229,7 @@
             <input type="number" class="form-control" id="SHMUZTECH_COUNT">
           </div>
         </div>
-         <div class="d-flex justify-content-end mt-3">
+         <div class="d-flex justify-content-end mt-4">
             <button id="save-global-btn" class="btn btn-primary">Save Globals</button>
         </div>
       </div>
@@ -184,7 +240,7 @@
         <h2>Group Management</h2>
         <button id="add-group-btn" class="btn btn-primary">Add New Group</button>
       </div>
-      <div class="card-body">
+      <div class="card-body p-4">
         <div id="group-list"></div>
       </div>
     </div>
@@ -193,11 +249,11 @@
   <div class="modal fade" id="group-modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header border-0">
           <h5 class="modal-title" id="modal-title">Add New Group</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body p-4">
           <form id="group-form">
             <input type="hidden" id="original-group-id">
             <input type="hidden" id="original-keywords-str">
@@ -209,19 +265,19 @@
               <label for="groupId" class="form-label">Group ID</label>
               <input type="text" class="form-control" id="groupId" required>
             </div>
-            <hr>
-            <p class="text-muted">Optional: Override global settings for this group.</p>
-            <div class="row">
-              <div class="col">
+            <hr class="my-4 border-secondary">
+            <p class="text-secondary small">Optional: Override global settings for this group.</p>
+            <div class="row g-3">
+              <div class="col-md-6">
                 <label for="prefix" class="form-label">Custom Prefix</label>
-                <input type="text" class="form-control" id="prefix" placeholder="Leave blank to use global">
+                <input type="text" class="form-control" id="prefix" placeholder="Use global">
               </div>
-              <div class="col">
+              <div class="col-md-6">
                 <label for="count" class="form-label">Custom Count</label>
-                <input type="number" class="form-control" id="count" placeholder="Leave blank to use global">
+                <input type="number" class="form-control" id="count" placeholder="Use global">
               </div>
             </div>
-            <div class="form-check mt-3">
+            <div class="form-check mt-4">
               <input class="form-check-input" type="checkbox" id="useBatchAdd">
               <label class="form-check-label" for="useBatchAdd">
                 Use Batch Add API (recommended)
@@ -229,7 +285,7 @@
             </div>
           </form>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer border-0">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" form="group-form" class="btn btn-primary">Save Group</button>
         </div>
@@ -242,14 +298,14 @@
   <template id="group-template">
     <div class="group-item">
       <div>
-        <h5 class="keywords mb-1"></h5>
-        <small class="text-muted">ID: <span class="groupId"></span></small>
-        <small class="text-muted ms-2">Prefix: <span class="prefix"></span></small>
-        <small class="text-muted ms-2">Count: <span class="count"></span></small>
-        <small class="text-muted ms-2">Add Method: <span class="addMethod"></span></small>
+        <h5 class="keywords mb-1 text-light"></h5>
+        <small class="text-body-secondary">ID: <span class="groupId"></span></small>
+        <small class="text-body-secondary ms-3">Prefix: <span class="prefix"></span></small>
+        <small class="text-body-secondary ms-3">Count: <span class="count"></span></small>
+        <small class="text-body-secondary ms-3">Add Method: <span class="addMethod"></span></small>
       </div>
       <div class="group-actions">
-        <button class="btn btn-outline-primary btn-sm edit-btn">Edit</button>
+        <button class="btn btn-outline-light btn-sm edit-btn">Edit</button>
         <button class="btn btn-outline-danger btn-sm delete-btn ms-2">Delete</button>
       </div>
     </div>
@@ -257,6 +313,48 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
   <script>
+    // --- GSAP Animations and Page Setup ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const loader = document.getElementById('loader');
+        gsap.to(loader, { opacity: 0, duration: 0.5, onComplete: () => loader.style.display = 'none' });
+
+        gsap.from('.container', { opacity: 0, y: -30, duration: 1, ease: 'power3.out', delay: 0.3 });
+
+        // Animated Gradient Blobs
+        const blobContainer = document.getElementById('gradient-blob-container');
+        const blobCount = 15;
+        const colors = ['#1766fa', '#3b82f6', '#ec4899', '#f59e0b', '#34d399'];
+
+        for (let i = 0; i < blobCount; i++) {
+            const blob = document.createElement('div');
+            blob.style.position = 'absolute';
+            const size = gsap.utils.random(window.innerWidth * 0.2, window.innerWidth * 0.4);
+            blob.style.width = `${size}px`;
+            blob.style.height = `${size}px`;
+            blob.style.background = `radial-gradient(circle, ${gsap.utils.random(colors)} 40%, transparent 70%)`;
+            blob.style.borderRadius = '50%';
+            blob.style.filter = `blur(${gsap.utils.random(120, 180)}px)`;
+            blob.style.opacity = gsap.utils.random(0.3, 0.7);
+            blobContainer.appendChild(blob);
+
+            gsap.set(blob, {
+                x: gsap.utils.random(0, window.innerWidth - size),
+                y: gsap.utils.random(0, window.innerHeight - size),
+            });
+
+            function animateBlob() {
+                gsap.to(blob, {
+                    x: gsap.utils.random(0, window.innerWidth - size),
+                    y: gsap.utils.random(0, window.innerHeight - size),
+                    duration: gsap.utils.random(15, 30),
+                    ease: 'power1.inOut',
+                    onComplete: animateBlob
+                });
+            }
+            animateBlob();
+        }
+    });
+
     let currentGroups = [];
     const groupList = document.getElementById('group-list');
     const groupTemplate = document.getElementById('group-template');
@@ -264,26 +362,18 @@
     const modalTitle = document.getElementById('modal-title');
     const groupForm = document.getElementById('group-form');
     const toast = document.getElementById('toast');
-    const loader = document.getElementById('loader');
-
-    function showLoader() { loader.style.opacity = '1'; loader.style.pointerEvents = 'auto'; }
-    function hideLoader() { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }
 
     // --- Data Fetching and Rendering ---
     document.addEventListener('DOMContentLoaded', () => {
-      showLoader();
-      Promise.all([
-        new Promise(resolve => google.script.run.withSuccessHandler(resolve).getGlobalSettings()),
-        new Promise(resolve => google.script.run.withSuccessHandler(resolve).getGroupConfigs())
-      ]).then(([settings, groups]) => {
+      google.script.run.withSuccessHandler(settings => {
         document.getElementById('USER_PREFIX').value = settings.USER_PREFIX;
         document.getElementById('USER_COUNT').value = settings.USER_COUNT;
         document.getElementById('SHMUZTECH_COUNT').value = settings.SHMUZTECH_COUNT;
-        
+      }).getGlobalSettings();
+      google.script.run.withSuccessHandler(groups => {
         currentGroups = groups;
         renderGroups();
-        hideLoader();
-      });
+      }).getGroupConfigs();
     });
 
     function renderGroups() {
@@ -291,8 +381,7 @@
       currentGroups.forEach((group, index) => {
         const clone = groupTemplate.content.cloneNode(true);
         const groupItem = clone.querySelector('.group-item');
-        groupItem.style.animationDelay = `${index * 0.1}s`;
-
+        
         clone.querySelector('.keywords').textContent = group.keywords.join(', ');
         clone.querySelector('.groupId').textContent = group.groupId;
         clone.querySelector('.prefix').textContent = group.prefix || '(Global)';
@@ -300,14 +389,22 @@
         clone.querySelector('.addMethod').textContent = group.useBatchAdd === false ? 'One-by-one' : 'Batch';
         
         const editBtn = clone.querySelector('.edit-btn');
-        editBtn.dataset.groupId = group.groupId;
-        editBtn.addEventListener('click', handleEdit);
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent card click from firing
+            handleEdit(group.groupId);
+        });
         
         const deleteBtn = clone.querySelector('.delete-btn');
-        deleteBtn.dataset.groupId = group.groupId;
-        deleteBtn.addEventListener('click', handleDelete);
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handleDelete(group.groupId);
+        });
         
+        groupItem.addEventListener('click', () => handleEdit(group.groupId));
+
         groupList.appendChild(clone);
+
+        gsap.from(groupItem, { y: 20, duration: 0.4, delay: index * 0.03, ease: 'power3.out' });
       });
     }
 
@@ -340,40 +437,31 @@
     document.getElementById('add-group-btn').addEventListener('click', () => openModal('add'));
     
     document.getElementById('save-global-btn').addEventListener('click', () => {
-      showLoader();
       const settings = {
         USER_PREFIX: document.getElementById('USER_PREFIX').value,
         USER_COUNT: document.getElementById('USER_COUNT').value,
         SHMUZTECH_COUNT: document.getElementById('SHMUZTECH_COUNT').value,
       };
-      google.script.run.withSuccessHandler(() => {
-          showToast('Global settings saved!');
-          hideLoader();
-      }).saveGlobalSettings(settings);
+      google.script.run.withSuccessHandler(() => showToast('Global settings saved!')).saveGlobalSettings(settings);
     });
 
-    function handleEdit(e) {
-      const groupId = e.target.dataset.groupId;
+    function handleEdit(groupId) {
       const group = currentGroups.find(g => g.groupId === groupId);
       openModal('edit', group);
     }
     
-    function handleDelete(e) {
-      const groupId = e.target.dataset.groupId;
+    function handleDelete(groupId) {
       const group = currentGroups.find(g => g.groupId === groupId);
       if (confirm(`Are you sure you want to delete the group for keywords "${group.keywords.join(', ')}"?`)) {
-        showLoader();
         google.script.run.withSuccessHandler(message => {
           showToast(message);
           loadGroups();
-          hideLoader();
         }).deleteGroup(groupId);
       }
     }
     
     groupForm.addEventListener('submit', e => {
       e.preventDefault();
-      showLoader();
       const groupData = {
         keywords: document.getElementById('keywords').value,
         groupId: document.getElementById('groupId').value,
@@ -388,20 +476,18 @@
         showToast(message);
         loadGroups();
         closeModal();
-        hideLoader();
       }).saveGroup(groupData);
     });
     
     // --- UI Feedback ---
     function showToast(message, isError = false) {
+      // This function can be improved with GSAP as well
+      const toast = document.getElementById('toast');
       toast.textContent = message;
       toast.className = 'toast'; // reset classes
       toast.classList.add(isError ? 'bg-danger' : 'bg-success', 'show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
+      setTimeout(() => toast.classList.remove('show'), 4000);
     }
-    
-    document.querySelector('.modal-footer .btn-secondary').addEventListener('click', closeModal);
-    document.querySelector('.modal-header .btn-close').addEventListener('click', closeModal);
 
   </script>
 </body>
