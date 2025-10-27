@@ -4,7 +4,8 @@
  */
 function doGet(e) {
   return HtmlService.createHtmlOutputFromFile('Index')
-    .setTitle('GroupMe Bot Settings')
+    .setTitle('RouteMe Settings')
+    .setFaviconUrl('https://raw.githubusercontent.com/Dev-in-the-BM/RouteMe/main/Assets/RouteMe_favicon.png')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.DEFAULT);
 }
 
