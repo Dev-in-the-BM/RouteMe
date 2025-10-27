@@ -172,3 +172,37 @@ function debugLog(message) {
     Logger.log(`DEBUG | ${message}`);
   }
 }
+
+/**
+ * Gets the GroupMe access token from script properties.
+ * @return {string} The GroupMe access token.
+ */
+function getGroupMeToken() {
+  return _getProperties().getProperty('GROUPME_TOKEN');
+}
+
+/**
+ * Saves the GroupMe access token to script properties.
+ * @param {string} token - The GroupMe access token.
+ */
+function saveGroupMeToken(token) {
+  _getProperties().setProperty('GROUPME_TOKEN', token);
+}
+
+/**
+ * Fetches the user's groups from the GroupMe API.
+ * @return {Array<object>} An array of group objects.
+ */
+function getGroupMeGroups() {
+  const token = getGroupMeToken();
+  if (!token) {
+    return [];
+  }
+  const url = `https://api.groupme.com/v3/groups?token=${token}&per_page=100`;
+  const response = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+  const code = response.getResponseCode();
+  if (code === 200) {
+    return JSON.parse(response.getContentText()).response;
+  }
+  return [];
+}

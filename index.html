@@ -212,6 +212,23 @@
 
     <div class="card">
       <div class="card-header">
+        <h2>Access Token</h2>
+      </div>
+      <div class="card-body p-4">
+        <div class="row g-3 align-items-center">
+          <div class="col">
+            <label for="GROUPME_TOKEN" class="form-label">GroupMe Access Token</label>
+            <input type="password" class="form-control" id="GROUPME_TOKEN">
+          </div>
+          <div class="col-auto">
+            <button id="save-token-btn" class="btn btn-primary mt-4">Save Token</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
         <h2>Global Settings</h2>
       </div>
       <div class="card-body p-4">
@@ -262,8 +279,8 @@
               <input type="text" class="form-control" id="keywords" required>
             </div>
             <div class="mb-3">
-              <label for="groupId" class="form-label">Group ID</label>
-              <input type="text" class="form-control" id="groupId" required>
+              <label for="groupId" class="form-label">Group</label>
+              <select class="form-select" id="groupId" required></select>
             </div>
             <hr class="my-4 border-secondary">
             <p class="text-secondary small">Optional: Override global settings for this group.</p>
@@ -299,7 +316,7 @@
     <div class="group-item">
       <div>
         <h5 class="keywords mb-1 text-light"></h5>
-        <small class="text-body-secondary">ID: <span class="groupId"></span></small>
+        <small class="text-body-secondary">Group: <span class="groupName"></span></small>
         <small class="text-body-secondary ms-3">Prefix: <span class="prefix"></span></small>
         <small class="text-body-secondary ms-3">Count: <span class="count"></span></small>
         <small class="text-body-secondary ms-3">Add Method: <span class="addMethod"></span></small>
@@ -356,6 +373,7 @@
     });
 
     let currentGroups = [];
+    let groupNameMap = {}; // To store group names by ID
     const groupList = document.getElementById('group-list');
     const groupTemplate = document.getElementById('group-template');
     const groupModal = new bootstrap.Modal(document.getElementById('group-modal'));
@@ -365,15 +383,31 @@
 
     // --- Data Fetching and Rendering ---
     document.addEventListener('DOMContentLoaded', () => {
+      google.script.run.withSuccessHandler(token => {
+        document.getElementById('GROUPME_TOKEN').value = token;
+      }).getGroupMeToken();
+
+      google.script.run.withSuccessHandler(groups => {
+        const groupSelect = document.getElementById('groupId');
+        groupSelect.innerHTML = ''; // Clear existing options
+        groupNameMap = {}; // Clear the map
+        groups.forEach(group => {
+          groupNameMap[group.id] = group.name;
+          const option = document.createElement('option');
+          option.value = group.id;
+          option.textContent = group.name;
+          groupSelect.appendChild(option);
+        });
+
+        // Now that the map is populated, render the groups that use it
+        loadGroups();
+      }).getGroupMeGroups();
+
       google.script.run.withSuccessHandler(settings => {
         document.getElementById('USER_PREFIX').value = settings.USER_PREFIX;
         document.getElementById('USER_COUNT').value = settings.USER_COUNT;
         document.getElementById('SHMUZTECH_COUNT').value = settings.SHMUZTECH_COUNT;
       }).getGlobalSettings();
-      google.script.run.withSuccessHandler(groups => {
-        currentGroups = groups;
-        renderGroups();
-      }).getGroupConfigs();
     });
 
     function renderGroups() {
@@ -383,7 +417,7 @@
         const groupItem = clone.querySelector('.group-item');
         
         clone.querySelector('.keywords').textContent = group.keywords.join(', ');
-        clone.querySelector('.groupId').textContent = group.groupId;
+        clone.querySelector('.groupName').textContent = groupNameMap[group.groupId] || group.groupId;
         clone.querySelector('.prefix').textContent = group.prefix || '(Global)';
         clone.querySelector('.count').textContent = group.count || '(Global)';
         clone.querySelector('.addMethod').textContent = group.useBatchAdd === false ? 'One-by-one' : 'Batch';
@@ -435,6 +469,27 @@
 
     // --- Event Handlers ---
     document.getElementById('add-group-btn').addEventListener('click', () => openModal('add'));
+
+    document.getElementById('save-token-btn').addEventListener('click', () => {
+      const token = document.getElementById('GROUPME_TOKEN').value;
+      google.script.run.withSuccessHandler(() => {
+        showToast('Token saved successfully!');
+        // Re-fetch groups and configs since the token might have changed
+        google.script.run.withSuccessHandler(groups => {
+          const groupSelect = document.getElementById('groupId');
+          groupSelect.innerHTML = ''; // Clear existing options
+          groupNameMap = {}; // Clear the map
+          groups.forEach(group => {
+            groupNameMap[group.id] = group.name;
+            const option = document.createElement('option');
+            option.value = group.id;
+            option.textContent = group.name;
+            groupSelect.appendChild(option);
+          });
+          loadGroups(); // Reload the group configs
+        }).getGroupMeGroups();
+      }).saveGroupMeToken(token);
+    });
     
     document.getElementById('save-global-btn').addEventListener('click', () => {
       const settings = {
@@ -444,6 +499,13 @@
       };
       google.script.run.withSuccessHandler(() => showToast('Global settings saved!')).saveGlobalSettings(settings);
     });
+
+    function loadGroups() {
+      google.script.run.withSuccessHandler(configs => {
+        currentGroups = configs;
+        renderGroups();
+      }).getGroupConfigs();
+    }
 
     function handleEdit(groupId) {
       const group = currentGroups.find(g => g.groupId === groupId);
