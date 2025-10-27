@@ -253,10 +253,6 @@
               <label for="USER_COUNT" class="form-label">Fallback User Count</label>
               <input type="number" class="form-control" id="USER_COUNT">
             </div>
-            <div class="col-md-4">
-              <label for="SHMUZTECH_COUNT" class="form-label">ShmuzTech Onboarding Count</label>
-              <input type="number" class="form-control" id="SHMUZTECH_COUNT">
-            </div>
           </div>
            <div class="d-flex justify-content-end mt-4">
               <button id="save-global-btn" class="btn btn-primary">Save Globals</button>
@@ -421,7 +417,6 @@
       google.script.run.withSuccessHandler(settings => {
         document.getElementById('USER_PREFIX').value = settings.USER_PREFIX;
         document.getElementById('USER_COUNT').value = settings.USER_COUNT;
-        document.getElementById('SHMUZTECH_COUNT').value = settings.SHMUZTECH_COUNT;
       }).getGlobalSettings();
     });
 
@@ -536,7 +531,6 @@
       const settings = {
         USER_PREFIX: document.getElementById('USER_PREFIX').value,
         USER_COUNT: document.getElementById('USER_COUNT').value,
-        SHMUZTECH_COUNT: document.getElementById('SHMUZTECH_COUNT').value,
       };
       google.script.run.withSuccessHandler(() => showToast('Global settings saved!')).saveGlobalSettings(settings);
     });

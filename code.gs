@@ -16,7 +16,6 @@ function processGoogleVoiceEmails() {
     sheetId: properties.getProperty('LOG_SHEET_ID'),
     userPrefix: properties.getProperty('USER_PREFIX') || 'User',
     userCount: parseInt(properties.getProperty('USER_COUNT')) || 1,
-    shmuzTechCount: parseInt(properties.getProperty('SHMUZTECH_COUNT')) || 1,
     routingRules: JSON.parse(properties.getProperty('MODULE_ROUTING_RULES') || '{}'),
     groupMeConfig: JSON.parse(properties.getProperty('GROUPME_ADDER_CONFIG') || '[]'),
     sampleConfig: JSON.parse(properties.getProperty('SAMPLE_MODULE_CONFIG') || '{}')
@@ -125,9 +124,6 @@ function processGoogleVoiceEmails() {
 function dispatchModule(moduleName, data, config, sheet) {
   Logger.log(`Dispatching to module: ${moduleName} for keyword: ${data.keyword}`);
   switch (moduleName) {
-    case 'shmuzTechOnboarding':
-      runShmuzTechOnboardingModule(data, config, sheet);
-      break;
     case 'sampleModule':
       runSampleModule(data, config, sheet);
       break;
@@ -141,45 +137,6 @@ function dispatchModule(moduleName, data, config, sheet) {
 // ---------------------------------------------------------------------------
 // --- MODULES - Each function handles a specific type of task ---
 // ---------------------------------------------------------------------------
-
-/**
- * MODULE: Creates a new GroupMe group, adds the sender, and posts welcome messages.
- * @param {object} data - The data object from the dispatcher.
- * @param {object} config - The master configuration object.
- * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet - The logging sheet.
- */
-function runShmuzTechOnboardingModule(data, config, sheet) {
-  const groupName = `Join ShmuzTech ${config.shmuzTechCount}`;
-  const newGroup = createGroupMeGroup(config.token, groupName);
-  if (!newGroup) {
-    logEntry(sheet, data.phone, data.keyword, `Error: Failed to create new GroupMe group "${groupName}".`);
-    return;
-  }
-  logEntry(sheet, data.phone, data.keyword, `Successfully created group "${groupName}" (ID: ${newGroup.id}).`);
-  // Use the single-add function for this one-off addition
-  const addResult = addToGroupMe(config.token, newGroup.id, [{ phone_number: data.phone, nickname: "New Member" }]);
-  if (!addResult.success) {
-    logEntry(sheet, data.phone, data.keyword, `Error: Failed to add user to new group ${newGroup.id}.`);
-    return;
-  }
-  logEntry(sheet, data.phone, data.keyword, `Successfully added user to new group.`);
-  const welcomeMessages = [
-    "Hi 👋, and welcome to ShmuzTech, a chat for anything tech and kosher tech related.\n\nAsk and shmuz about tech, filtering, kosher devices, deals, modding apps and ROMs, and more.",
-    "All members must keep to the following rules:\n\n • No posting anything related to hacking filters, or filters or kosher devices being hacked.\n• No foul or inappropriate language or topics.\n• No spamming.\n• No posting anything that's off-topic or unrelated to tech.\n• No posting about accessing AI image generators via text.\n\nAny violation of these rules will cause immediate removal.",
-    "To be added to the chat, please provide the following information:\n\n• What's your name?\n• Where did you hear about this chat from?\n• Age\n• If you're a user on JTech Forums, what's your username?\n• Do you have any experience or skills related to tech (for example, filtering, troubleshooting, programming, device repair, app modding, etc.)?\n• What do you want your name to show up as on the chat?\n\nThis information will not be given out and will be kept private."
-  ];
-  for (let i = 0; i < welcomeMessages.length; i++) {
-    Utilities.sleep(1500);
-    const postSuccess = postGroupMeMessage(config.token, newGroup.id, welcomeMessages[i]);
-    if (!postSuccess) {
-      logEntry(sheet, data.phone, data.keyword, `Error: Failed to post welcome message #${i+1}.`);
-    }
-  }
-  logEntry(sheet, data.phone, data.keyword, `Posted welcome messages.`);
-  PropertiesService.getScriptProperties().setProperty('SHMUZTECH_COUNT', (config.shmuzTechCount + 1).toString());
-  Logger.log(`SHMUZTECH_COUNT incremented to ${config.shmuzTechCount + 1}`);
-  logEntry(sheet, data.phone, data.keyword, `Onboarding process complete.`);
-}
 
 /**
  * =================================================================================
@@ -576,10 +533,8 @@ function setup() {
     // IMPORTANT: Set the GROUPME_TOKEN in Project Settings > Script Properties
     'USER_PREFIX': 'User',
     'USER_COUNT': '1',
-    'SHMUZTECH_COUNT': '1',
     'DEBUG_MODE': 'false', // New property for verbose logging
     'MODULE_ROUTING_RULES': JSON.stringify({
-      'shmuztech': 'shmuzTechOnboarding',
       'info': 'sampleModule'
     }, null, 2),
     'GROUPME_ADDER_CONFIG': JSON.stringify([], null, 2), // Now defaults to an empty array
