@@ -1,4 +1,4 @@
-![RouteMe Logo](https://github.com/Dev-in-the-BM/RouteMe/blob/main/RouteMe.png?raw=true)
+<p align="center"><img src="https://github.com/Dev-in-the-BM/RouteMe/blob/main/RouteMe.png?raw=true" alt="RouteMe Logo"></p>
 
 # <img src="https://github.com/Dev-in-the-BM/RouteMe/blob/main/RouteMe.png?raw=true" alt="Rocket" width="25" height="25" /> RouteMe: Automate GroupMe Invites via Google Voice
 
@@ -38,8 +38,8 @@ First, we need to create a new project in Google Apps Script and add the necessa
 1. Go to [script.google.com](https://script.google.com/home/start) and click **New project**.
 2. You will see a file named `Code.gs`.
 3. Click the **+** icon next to **Files** and add two more files:
-    * A **Script** file named `WebApp.gs`.
-    * An **HTML** file named `index.html`.
+   * A **Script** file named `WebApp.gs`.
+   * An **HTML** file named `index.html`.
 
 *You should now have three files in your project: `Code.gs`, `WebApp.gs`, and `index.html`.*
 
@@ -58,8 +58,8 @@ Next, we need to "deploy" the script. This makes the settings website accessible
 1. At the top right, click **Deploy** and select **New deployment**.
 2. Click the gear icon next to "Select type" and choose **Web app**.
 3. Configure the web app settings:
-    * **Execute as:** `Me`
-    * **Who has access:** `Only myself`
+   * **Execute as:** `Me`
+   * **Who has access:** `Only myself`
 4. Click **Deploy**.
 5. **Important:** A "Web app URL" will be displayed. **Copy and save this URL.** This is the link to your private settings page.
 
@@ -69,19 +69,19 @@ Now we'll use the web app you just deployed to complete the setup.
 
 1. **Open the Web App URL** you saved in the previous step.
 2. **Run the Automated Setup:**
-    * You will see a "One-Time Setup" card. Click the **Run Automated Setup** button.
-    * This will automatically:
-      * Create a Google Sheet to log all activity.
-      * Create a trigger to check for new text messages every 5 minutes.
-    * A pop-up will ask for permissions. **You must click "Review permissions" and "Allow"** for the script to work.
+   * You will see a "One-Time Setup" card. Click the **Run Automated Setup** button.
+   * This will automatically:
+     * Create a Google Sheet to log all activity.
+     * Create a trigger to check for new text messages every 5 minutes.
+   * A pop-up will ask for permissions. **You must click "Review permissions" and "Allow"** for the script to work.
 3. **Enter Your GroupMe Access Token:**
-    * Once the setup is complete, the main settings will appear.
-    * Paste your **GroupMe Access Token** into the "GroupMe Access Token" field and click **Save Token**.
+   * Once the setup is complete, the main settings will appear.
+   * Paste your **GroupMe Access Token** into the "GroupMe Access Token" field and click **Save Token**.
 4. **Add Your First Group:**
-    * Click **Add New Group**.
-    * **Keywords:** Enter the keywords you want to trigger the invite, separated by commas (e.g., `join, news, updates`).
-    * **Group:** Select the GroupMe group you want to link to these keywords.
-    * Click **Save Group**.
+   * Click **Add New Group**.
+   * **Keywords:** Enter the keywords you want to trigger the invite, separated by commas (e.g., `join, news, updates`).
+   * **Group:** Select the GroupMe group you want to link to these keywords.
+   * Click **Save Group**.
 
 ---
 
@@ -96,3 +96,9 @@ Your bot is now live! When someone texts one of your keywords to your Google Voi
 * **"Authorization is required" error:** If you see this, it means you need to grant permissions to the script. Follow the on-screen instructions to authorize it.
 * **Changes not appearing:** If you make changes to the code, you will need to create a new deployment to see the changes reflected in the web app. Go to **Deploy > Manage deployments**, select your deployment, and click the pencil icon to create a new version.
 * **Check the logs:** If you encounter any issues, the first place to look is the "Logs" sheet in your "GroupMe Bot Logs" Google Sheet. It will tell you what the script is doing and if there are any errors.
+  
+  [![HitCount](https://hits.dwyl.com/dev-in-the-bm/routeme.svg?style=flat-square)](http://hits.dwyl.com/dev-in-the-bm/routeme)
+  
+  
+  [![HitCount](https://hits.dwyl.com/dev-in-the-bm/routeme.svg?style=flat-square&show=unique)](http://hits.dwyl.com/dev-in-the-bm/routeme)
+
