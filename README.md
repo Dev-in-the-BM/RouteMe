@@ -31,27 +31,13 @@ Make sure you have the following:
 
 ## <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Microsoft-Teams-Animated-Emojis/master/Emojis/Objects/Gear.png" alt="Gear" width="25" height="25" /> Step-by-Step Setup Guide
 
-### Step 1: Create the Google Apps Script Project
+### Step 1: Make a Copy of the Google Apps Script Project
 
-First, we need to create a new project in Google Apps Script and add the necessary files.
+1.  Open the RouteMe Google Apps Script project by clicking [this link](https://script.google.com/d/1nyBz692J6Nds4oK624C1AvGSmo96mc86Lm97yL3tpOeq1PmF9wUn2CxK/edit?usp=sharing).
+2.  In the script editor, click **Project Details** (the 'i' icon) on the left.
+3.  Click **Make a copy** to save the project to your Google Account.
 
-1. Go to [script.google.com](https://script.google.com/home/start) and click **New project**.
-2. You will see a file named `Code.gs`.
-3. Click the **+** icon next to **Files** and add two more files:
-   * A **Script** file named `WebApp.gs`.
-   * An **HTML** file named `index.html`.
-
-*You should now have three files in your project: `Code.gs`, `WebApp.gs`, and `index.html`.*
-
-### Step 2: Copy the Code
-
-Copy the contents of the files from this project into the corresponding files in your new Google Apps Script project.
-
-1. Copy the content of `code.gs` into your `Code.gs` file.
-2. Copy the content of `WebApp.gs` into your `WebApp.gs` file.
-3. Copy the content of `index.html` into your `index.html` file.
-
-### Step 3: Deploy the Web App
+### Step 2: Deploy the Web App
 
 Next, we need to "deploy" the script. This makes the settings website accessible via a private URL.
 
@@ -63,7 +49,7 @@ Next, we need to "deploy" the script. This makes the settings website accessible
 4. Click **Deploy**.
 5. **Important:** A "Web app URL" will be displayed. **Copy and save this URL.** This is the link to your private settings page.
 
-### Step 4: Configure the Script via the Web App
+### Step 3: Configure the Script via the Web App
 
 Now we'll use the web app you just deployed to complete the setup.
 
