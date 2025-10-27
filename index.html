@@ -390,7 +390,6 @@
       google.script.run.withSuccessHandler(groups => {
         const groupSelect = document.getElementById('groupId');
         groupSelect.innerHTML = ''; // Clear existing options
-        groupNameMap = {}; // Clear the map
         groups.forEach(group => {
           groupNameMap[group.id] = group.name;
           const option = document.createElement('option');
