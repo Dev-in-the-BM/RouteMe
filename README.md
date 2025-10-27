@@ -96,5 +96,3 @@ Your bot is now live! When someone texts one of your keywords to your Google Voi
 * **"Authorization is required" error:** If you see this, it means you need to grant permissions to the script. Follow the on-screen instructions to authorize it.
 * **Changes not appearing:** If you make changes to the code, you will need to create a new deployment to see the changes reflected in the web app. Go to **Deploy > Manage deployments**, select your deployment, and click the pencil icon to create a new version.
 * **Check the logs:** If you encounter any issues, the first place to look is the "Logs" sheet in your "GroupMe Bot Logs" Google Sheet. It will tell you what the script is doing and if there are any errors.
-
-![Visitor Count](https://komarev.com/ghpvc/?username=Dev-in-the-BM&label=Repo%20Visitors&color=blueviolet&style=flat-square)
