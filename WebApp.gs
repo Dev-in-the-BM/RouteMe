@@ -206,3 +206,55 @@ function getGroupMeGroups() {
   }
   return [];
 }
+
+/**
+ * Checks if the initial setup has been completed.
+ * @return {boolean} True if setup is complete, false otherwise.
+ */
+function checkSetupStatus() {
+  return _getProperties().getProperty('SETUP_COMPLETED') === 'true';
+}
+
+/**
+ * Runs the one-time setup process.
+ * @return {string} A success or error message.
+ */
+function runFirstTimeSetup() {
+  try {
+    // 1. Run the existing setup function from code.gs
+    setup();
+
+    // 2. Set up the time-based trigger
+    const functionName = 'processGoogleVoiceEmails';
+    
+    // Delete any existing triggers for this function to avoid duplicates
+    const existingTriggers = ScriptApp.getProjectTriggers();
+    existingTriggers.forEach(trigger => {
+      if (trigger.getHandlerFunction() === functionName) {
+        ScriptApp.deleteTrigger(trigger);
+      }
+    });
+
+    // Create a new trigger to run every 5 minutes
+    ScriptApp.newTrigger(functionName)
+      .timeBased()
+      .everyMinutes(5)
+      .create();
+
+    // 3. Mark setup as complete
+    _getProperties().setProperty('SETUP_COMPLETED', 'true');
+    
+    return 'Setup completed successfully! The script is now running.';
+  } catch (e) {
+    Logger.log(`Error during first-time setup: ${e.message}`);
+    return `An error occurred: ${e.message}`;
+  }
+}
+
+/**
+ * Gets the URL of the deployed web app.
+ * @return {string} The web app URL.
+ */
+function getScriptUrl() {
+  return ScriptApp.getService().getUrl();
+}
