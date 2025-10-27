@@ -1,4 +1,4 @@
-<p align="center"><a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=800&size=25&pause=1000&color=1766FA&background=1766FA00&center=true&vCenter=true&width=700&lines=RouteMe;Automate+GroupMe+Invites+via+Google+Voice" alt="Typing SVG" /></a></p>
+<p align="center"><a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Montserrat&weight=800&size=40&pause=1000&color=1766FA&background=1766FA00&center=true&vCenter=true&width=1000&height=100&lines=RouteMe;Automate+GroupMe+Invites+via+Google+Voice" alt="Typing SVG" /></a></p>
 
 # <img src="https://github.com/Dev-in-the-BM/RouteMe/blob/main/RouteMe.png?raw=true" alt="Rocket" width="25" height="25" /> RouteMe: Automate GroupMe Invites via Google Voice
 
