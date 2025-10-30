@@ -35,7 +35,7 @@ Make sure you have the following:
 
 1.  Open the RouteMe Google Apps Script project by clicking [this link](https://script.google.com/d/1nyBz692J6Nds4oK624C1AvGSmo96mc86Lm97yL3tpOeq1PmF9wUn2CxK/edit?usp=sharing).
 2.  In the script editor, click **Project Details** (the 'i' icon) on the left.
-3.  Click **Make a copy** to save the project to your Google Account.
+3.  Click the **Make a copy** symbol on the top right corner to save the project to your Google Account.
 
 ### Step 2: Deploy the Web App
 
